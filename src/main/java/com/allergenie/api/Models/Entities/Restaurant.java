@@ -20,6 +20,10 @@ public class Restaurant {
     private String city;
     private String state;
     private String zipCode;
+
+    public Integer getId() {
+        return id;
+    }
 }
 
 
