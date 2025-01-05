@@ -1,7 +1,3 @@
---create the db
---create the table
---optional insert data to tables
-
 CREATE table restaurant (
 	id int NOT NULL auto_increment,
     name varchar(150),
@@ -13,4 +9,20 @@ CREATE table restaurant (
     state varchar(27),
     zipcode varchar(10),
     PRIMARY KEY (id)
+);
+
+CREATE TABLE menu(
+    id int NOT NULL AUTO_INCREMENT,
+    name varchar(50),
+    isactive tinyint,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE restaurantmenucrosswalk(
+id int NOT NULL AUTO_INCREMENT,
+restaurantid int NOT NULL,
+menuid int NOT NULL,
+PRIMARY KEY (id),
+FOREIGN KEY (restaurantid) references restaurant(id),
+FOREIGN KEY (menuid) references menu(id)
 );
