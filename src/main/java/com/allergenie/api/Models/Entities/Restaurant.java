@@ -21,9 +21,6 @@ public class Restaurant {
     private String state;
     private String zipCode;
 
-    public Integer getId() {
-        return id;
-    }
 }
 
 
