@@ -24,4 +24,9 @@ public class Menu {
         this.isActive = rs.getBoolean("isactive");
     }
 
+    public Menu(String name) {
+        this.name = name;
+        this.isActive = false;
+    }
+
 }
