@@ -1,7 +1,8 @@
 package com.allergenie.api.Controllers;
 
 import com.allergenie.api.Models.Entities.Menu;
-import com.allergenie.api.Models.Requests.CreateMenuRequest;
+import com.allergenie.api.Models.Requests.NewEditMenuRequest;
+import com.allergenie.api.Models.Responses.MenuDetailsResponse;
 import com.allergenie.api.Services.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,8 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import static java.util.Collections.emptyList;
 
 @RestController
 @RequestMapping(value = "/api/menu")
@@ -30,10 +29,42 @@ public class MenuController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Menu> createMenu(@RequestBody CreateMenuRequest request) {
+    public ResponseEntity<Menu> createMenu(@RequestBody NewEditMenuRequest request) {
         try {
             Menu response = menuService.createMenu(request);
             return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<Menu> updateMenu(@RequestBody NewEditMenuRequest request) {
+        try {
+            Menu response = menuService.updateMenu(request);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @GetMapping("/getMenuDetails/{menuId}")
+    public ResponseEntity<MenuDetailsResponse> getMenuDetails(@PathVariable Integer menuId) {
+        try {
+            MenuDetailsResponse response = menuService.getMenuDetails(menuId);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @DeleteMapping("/delete/{menuId}")
+    public ResponseEntity<String> deleteMenu(@PathVariable Integer menuId) {
+        try {
+            if(menuId == 0) {
+                return new ResponseEntity<>("Invalid menuId", HttpStatus.BAD_REQUEST);
+            }
+            return new ResponseEntity<>("You hit the API!", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

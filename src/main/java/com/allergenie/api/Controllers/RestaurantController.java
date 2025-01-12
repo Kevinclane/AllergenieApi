@@ -36,11 +36,11 @@ public class RestaurantController {
         try {
             Optional<Restaurant> restaurant = restaurantService.getRestaurantById(id);
             if(restaurant.isEmpty()) {
-                return new ResponseEntity<>(new Restaurant(), HttpStatus.NOT_FOUND);
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
             return new ResponseEntity<>(restaurant.get(), HttpStatus.OK);
         } catch (Exception e) {
-            return new ResponseEntity<>(new Restaurant(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
 
