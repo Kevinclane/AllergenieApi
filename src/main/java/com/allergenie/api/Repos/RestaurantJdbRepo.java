@@ -1,6 +1,6 @@
 package com.allergenie.api.Repos;
 
-import com.allergenie.api.Models.Entities.Menu;
+import com.allergenie.api.Models.Entities.Restaurant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -10,27 +10,25 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class MenuJdbcRepo implements MenuJdbcRepoImpl {
-
+public class RestaurantJdbRepo {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
-    public MenuJdbcRepo(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public RestaurantJdbRepo(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
-    @Override
-    public List<Menu> findByRestaurantId(Integer restaurantId) {
-        String query = "SELECT m.id, m.name, m.isactive FROM menu m " +
-                "JOIN restaurantmenucrosswalk rmc on m.id = rmc.menuid " +
-                "JOIN restaurant r on r.id = rmc.restaurantid " +
-                "WHERE r.id = :restaurantId;";
+    public List<Restaurant> getRestaurantsByMenuId(Integer menuId) {
+        String query = "SELECT r.id, r.name, r.phoneNumber, r.emailAddress, r.streetAddress, r.streetAddressTwo, r.city, r.state, r.zipCode FROM Restaurant r " +
+                "JOIN RestaurantMenuCrosswalk rmc ON r.id = rmc.restaurantId " +
+                "WHERE rmc.menuId = :menuId;";
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("restaurantId", restaurantId);
-        List<Menu> responses = namedParameterJdbcTemplate.query(
+                .addValue("menuId", menuId);
+
+        List<Restaurant> responses = namedParameterJdbcTemplate.query(
                 query,
                 parameters,
-                (rs, rn) -> new Menu(rs)
+                (rs, rn) -> new Restaurant(rs)
         );
 
         return responses;
