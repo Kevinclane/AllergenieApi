@@ -3,6 +3,7 @@ package com.allergenie.api.Controllers;
 import com.allergenie.api.Models.Entities.Menu;
 import com.allergenie.api.Models.Requests.NewEditMenuRequest;
 import com.allergenie.api.Models.Responses.MenuDetailsResponse;
+import com.allergenie.api.Models.Responses.MenuItemGroupDetails;
 import com.allergenie.api.Services.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,16 @@ public class MenuController {
         try {
             Menu response = menuService.updateMenu(request);
             return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PostMapping("/updateFullMenu")
+    public ResponseEntity<List<MenuItemGroupDetails>> updateMenuContents(@RequestBody List<MenuItemGroupDetails> request) {
+        try {
+            List<MenuItemGroupDetails> responses = menuService.updateMenuContents(request);
+            return new ResponseEntity<>(responses, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

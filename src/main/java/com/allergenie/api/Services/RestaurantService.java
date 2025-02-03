@@ -3,12 +3,14 @@ package com.allergenie.api.Services;
 import com.allergenie.api.Models.Entities.Restaurant;
 import com.allergenie.api.Repos.RestaurantJdbRepo;
 import com.allergenie.api.Repos.RestaurantRepo;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class RestaurantService {
 
     private RestaurantRepo restaurantRepo;
