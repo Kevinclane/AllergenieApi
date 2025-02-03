@@ -50,9 +50,9 @@ public class MenuController {
     }
 
     @PostMapping("/updateFullMenu")
-    public ResponseEntity<List<MenuItemGroupDetails>> updateFullMenu(@RequestBody List<MenuItemGroupDetails> request) {
+    public ResponseEntity<List<MenuItemGroupDetails>> updateMenuContents(@RequestBody List<MenuItemGroupDetails> request) {
         try {
-            List<MenuItemGroupDetails> responses = menuService.updateFullMenu(request);
+            List<MenuItemGroupDetails> responses = menuService.updateMenuContents(request);
             return new ResponseEntity<>(responses, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
