@@ -1,6 +1,9 @@
+package com.allergenie.api;
+
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.security.keyvault.secrets.SecretClient;
 import com.azure.security.keyvault.secrets.SecretClientBuilder;
+import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,33 +15,35 @@ import java.util.Arrays;
 public class DataSourceConfig {
     private final SecretClient secretClient;
     private final Environment environment;
-    private final boolean isLocal;
+    private final boolean isLive;
 
     public DataSourceConfig(Environment environment) {
         this.environment = environment;
-        if (Arrays.stream(environment.getActiveProfiles()).noneMatch(env -> (env.equalsIgnoreCase("local")))) {
+        this.isLive = Arrays.stream(environment.getActiveProfiles()).anyMatch(env -> (env.equalsIgnoreCase("dev") || env.equalsIgnoreCase("test") || env.equalsIgnoreCase("prod")));
+        if (isLive) {
             this.secretClient = new SecretClientBuilder()
                     .vaultUrl(environment.getProperty("spring.cloud.azure.keyvault.secret.endpoint"))
                     .credential(new DefaultAzureCredentialBuilder().build())
                     .buildClient();
-            this.isLocal = false;
         } else {
             this.secretClient = null;
-            this.isLocal = true;
         }
     }
 
     @Bean
     public HikariDataSource dataSource() {
-        HikariDataSource dataSource = new HikariDataSource();
-        if (isLocal) {
-            dataSource.setJdbcUrl(environment.getProperty("spring.datasource.url"));
-            dataSource.setUsername(environment.getProperty("spring.datasource.username"));
-            dataSource.setPassword(environment.getProperty("spring.datasource.password"));
+
+        HikariConfig config = new HikariConfig();
+        if (isLive) {
+            config.setJdbcUrl(secretClient.getSecret("ConnectionString").getValue());
+            config.setUsername(secretClient.getSecret("Username").getValue());
+            config.setPassword(secretClient.getSecret("Password").getValue());
         } else {
-            dataSource.setJdbcUrl(secretClient.getSecret("ConnectionString").getValue());
+            config.setJdbcUrl(environment.getProperty("spring.datasource.url"));
+            config.setUsername(environment.getProperty("spring.datasource.username"));
+            config.setPassword(environment.getProperty("spring.datasource.password"));
         }
 
-        return dataSource;
+        return new HikariDataSource(config);
     }
 }

@@ -35,10 +35,7 @@ public class RestaurantController {
     public ResponseEntity<Restaurant> getRestaurantById(Integer id) {
         try {
             Optional<Restaurant> restaurant = restaurantService.getRestaurantById(id);
-            if(restaurant.isEmpty()) {
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            }
-            return new ResponseEntity<>(restaurant.get(), HttpStatus.OK);
+            return restaurant.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
