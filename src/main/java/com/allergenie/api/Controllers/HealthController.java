@@ -17,13 +17,12 @@ public class HealthController {
 
     @Autowired
     private RestaurantRepo restaurantRepo;
-    @GetMapping
+    @GetMapping(value = "ping")
     public ResponseEntity<String> ping() {
         return new ResponseEntity<>("pong", HttpStatus.OK);
     }
 
-    @GetMapping
-    @RequestMapping(value = "db")
+    @GetMapping(value = "db")
     public ResponseEntity<String> dbPing() {
         try {
             Optional<Restaurant> restaurant = restaurantRepo.findById(1);
