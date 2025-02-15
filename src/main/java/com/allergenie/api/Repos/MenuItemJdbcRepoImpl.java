@@ -1,5 +1,9 @@
 package com.allergenie.api.Repos;
 
-public interface MenuItemJdbcRepoImpl {
+import com.allergenie.api.Models.Responses.MenuItemGroupDetails;
 
+import java.util.List;
+
+public interface MenuItemJdbcRepoImpl {
+    List<MenuItemGroupDetails> getGroupedMenuItems(Integer menuId);
 }

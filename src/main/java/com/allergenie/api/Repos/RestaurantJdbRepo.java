@@ -19,9 +19,9 @@ public class RestaurantJdbRepo {
     }
 
     public List<Restaurant> getRestaurantsByMenuId(Integer menuId) {
-        String query = "SELECT r.id, r.name, r.phoneNumber, r.emailAddress, r.streetAddress, r.streetAddressTwo, r.city, r.state, r.zipCode FROM Restaurant r " +
-                "JOIN RestaurantMenuCrosswalk rmc ON r.id = rmc.restaurantId " +
-                "WHERE rmc.menuId = :menuId;";
+        String query = "SELECT r.id, r.name, r.phone_number, r.email_address, r.street_address, r.street_address_two, r.city, r.state, r.zip_code FROM restaurant r " +
+                "JOIN restaurant_menu_crosswalk rmc ON r.id = rmc.restaurant_id " +
+                "WHERE rmc.menu_id = :menuId;";
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("menuId", menuId);
 

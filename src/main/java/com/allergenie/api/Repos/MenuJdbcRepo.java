@@ -21,9 +21,9 @@ public class MenuJdbcRepo implements MenuJdbcRepoImpl {
 
     @Override
     public List<Menu> findByRestaurantId(Integer restaurantId) {
-        String query = "SELECT m.id, m.name, m.isactive FROM menu m " +
-                "JOIN restaurantmenucrosswalk rmc on m.id = rmc.menuid " +
-                "JOIN restaurant r on r.id = rmc.restaurantid " +
+        String query = "SELECT m.id, m.name, m.is_active FROM menu m " +
+                "JOIN restaurant_menu_crosswalk rmc on m.id = rmc.menu_id " +
+                "JOIN restaurant r on r.id = rmc.restaurant_id " +
                 "WHERE r.id = :restaurantId;";
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("restaurantId", restaurantId);
