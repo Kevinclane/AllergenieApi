@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Repository
-public class MenuItemJdbcRepo {
+public class MenuItemJdbcRepo implements MenuItemJdbcRepoImpl {
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -29,17 +29,17 @@ public class MenuItemJdbcRepo {
         String query = "SELECT " +
                 "mi.id as menuItemId, " +
                 "mi.name as menuItemName, " +
-                "mi.menuid as menuId, " +
+                "mi.menu_id as menuId, " +
                 "mi.description as menuItemDescription, " +
-                "mi.extradetails as menuItemExtraDetails, " +
+                "mi.extra_details as menuItemExtraDetails, " +
                 "mi.price as menuItemPrice, " +
                 "mi.position as menuItemPosition, " +
                 "mig.id as groupId, " +
                 "mig.name as groupName, " +
                 "mig.position as groupPosition " +
-                "FROM menuitem mi " +
-                "JOIN menuitemgroup mig ON mi.menuitemgroupid = mig.id " +
-                "WHERE mi.menuid = :menuId " +
+                "FROM menu_item mi " +
+                "JOIN menu_item_group mig ON mi.menu_item_group_id = mig.id " +
+                "WHERE mi.menu_id = :menuId " +
                 "ORDER BY groupPosition, menuItemPosition";
         List<MenuItemGroupRow> rows = namedParameterJdbcTemplate.query(
                 query,

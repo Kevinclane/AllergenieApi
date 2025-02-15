@@ -13,7 +13,7 @@ public interface MenuItemGroupRepo extends JpaRepository<MenuItemGroup, Integer>
     List<MenuItemGroup> findAllByMenuId(Integer menuId);
 
     @Modifying
-    @Query(value = "DELETE menuitemgroup FROM menuitemgroup WHERE id NOT IN ?1 AND menuid = ?2",
+    @Query(value = "DELETE menu_item_group FROM menu_item_group WHERE id NOT IN ?1 AND menu_id = ?2",
             nativeQuery = true)
     void deleteUnusedGroups(List<Integer> existingGroupIds, Integer menuId);
 }
