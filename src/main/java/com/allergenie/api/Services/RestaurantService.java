@@ -29,7 +29,6 @@ public class RestaurantService {
         return restaurants;
     }
 
-
     public Optional<Restaurant> getRestaurantById(Integer id) {
         Optional<Restaurant> restaurant = restaurantRepo.findById(id);
         return restaurant;
@@ -38,5 +37,22 @@ public class RestaurantService {
     public List<Restaurant> getByMenuId(Integer menuId) {
         List<Restaurant> restaurants = restaurantJdbRepo.getRestaurantsByMenuId(menuId);
         return restaurants;
+    }
+
+    public Restaurant saveRestaurant(Restaurant restaurant) throws Exception {
+        if(restaurant.getId().equals(0)) {
+            restaurant.setId(null);
+        }
+        if(restaurant.isValid()) {
+            return restaurantRepo.save(restaurant);
+
+        } else {
+            throw new Exception("Restaurant contains invalid fields");
+        }
+    }
+
+    public void deleteRestaurant(Integer id) {
+        //add cascade delete
+        restaurantRepo.deleteById(id);
     }
 }

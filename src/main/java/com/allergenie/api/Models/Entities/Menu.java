@@ -25,7 +25,7 @@ public class Menu {
     public Menu(ResultSet rs) throws SQLException {
         this.id = rs.getInt("id");
         this.name = rs.getString("name");
-        this.isActive = rs.getBoolean("isactive");
+        this.isActive = rs.getBoolean("is_active");
     }
 
     public Menu(String name) {
