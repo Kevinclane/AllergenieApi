@@ -1,6 +1,5 @@
 package com.allergenie.api.Models.Responses;
 
-import com.allergenie.api.Models.Entities.MenuItem;
 import com.allergenie.api.Models.Rows.MenuItemGroupRow;
 import lombok.AllArgsConstructor;
 import lombok.Data;

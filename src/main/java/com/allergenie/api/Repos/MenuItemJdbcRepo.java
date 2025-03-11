@@ -1,7 +1,5 @@
 package com.allergenie.api.Repos;
 
-import com.allergenie.api.Models.Entities.Allergen;
-import com.allergenie.api.Models.Entities.MenuItem;
 import com.allergenie.api.Models.Responses.MenuItemDetails;
 import com.allergenie.api.Models.Responses.MenuItemGroupDetails;
 import com.allergenie.api.Models.Rows.MenuItemGroupRow;

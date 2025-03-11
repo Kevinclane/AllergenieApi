@@ -1,8 +1,5 @@
 package com.allergenie.api;
 
-import com.azure.identity.DefaultAzureCredentialBuilder;
-import com.azure.security.keyvault.secrets.SecretClient;
-import com.azure.security.keyvault.secrets.SecretClientBuilder;
 import org.apache.log4j.Logger;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -53,7 +50,7 @@ public class AllergenieApiApplication implements CommandLineRunner {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**").allowedOrigins("http://localhost:4200")
-                .allowedMethods("GET", "POST", "PUT", "DELETE");
+                        .allowedMethods("GET", "POST", "PUT", "DELETE");
             }
         };
     }

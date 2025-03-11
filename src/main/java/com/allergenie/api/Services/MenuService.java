@@ -52,6 +52,14 @@ public class MenuService {
 
     public Menu createMenu(NewEditMenuRequest request) {
         Menu menu = new Menu(request.getName());
+
+        if (!request.getCloneOptionId().equals(0)) {
+            Menu cloneMenu = menuRepo.findById(request.getCloneOptionId())
+                    .orElseThrow();
+            menu.setName(cloneMenu.getName());
+            menu.setIsActive(cloneMenu.getIsActive());
+        }
+
         menuRepo.save(menu);
 
         for (Integer restaurantId : request.getRestaurantIds()) {
@@ -126,84 +134,84 @@ public class MenuService {
                     .filter(x -> x.getAllergenId().equals(a.getId()))
                     .findFirst()
                     .orElse(null);
-                if (mia != null) {
-                    //crosswalk already exists, remove from list so remainder can be deleted
-                    linkedMIAs.remove(mia);
-                } else {
-                    //crosswalk does not exist, add to list to be created
-                    mia = new MenuItemAllergen();
-                    mia.setAllergenId(a.getId());
-                    mia.setMenuItemId(mid.getId());
-                    response.add(mia);
-                }
+            if (mia != null) {
+                //crosswalk already exists, remove from list so remainder can be deleted
+                linkedMIAs.remove(mia);
+            } else {
+                //crosswalk does not exist, add to list to be created
+                mia = new MenuItemAllergen();
+                mia.setAllergenId(a.getId());
+                mia.setMenuItemId(mid.getId());
+                response.add(mia);
             }
-
-            //delete all remaining linked allergens
-            if (!linkedMIAs.isEmpty()) {
-                allergenService.deleteMenuItemAllergens(linkedMIAs);
-            }
-
-            return response;
         }
 
-        private List<Integer> syncMenuItems (MenuItemGroupDetails groupDetails){
-
-            List<MenuItem> menuItems = groupDetails.getMenuItems().stream().map(menuItemDetails -> {
-                MenuItem mi = new MenuItem(menuItemDetails);
-                mi.setMenuItemGroupId(groupDetails.getId());
-                return mi;
-            }).toList();
-            menuItemService.saveMenuItems(menuItems);
-
-            List<Integer> ids = menuItems.stream().map(MenuItem::getId).toList();
-            List<Integer> response = new ArrayList<>(ids);
-
-            List<MenuItemAllergen> MIAs_toSave = new ArrayList<>();
-
-            //Loop through group's menu items
-            for (int i = 0; i < groupDetails.getMenuItems().size(); i++) {
-                MenuItemDetails mid = groupDetails.getMenuItems().get(i);
-                mid.setId(ids.get(i));
-                mid.setMenuItemGroupId(groupDetails.getId());
-                MIAs_toSave.addAll(syncMenuItemAllergens(mid));
-            }
-            allergenService.saveMenuItemAllergens(MIAs_toSave);
-
-            return response;
+        //delete all remaining linked allergens
+        if (!linkedMIAs.isEmpty()) {
+            allergenService.deleteMenuItemAllergens(linkedMIAs);
         }
 
-
-        @Transactional
-        public List<MenuItemGroupDetails> updateMenuContents (List < MenuItemGroupDetails > request) {
-            Integer menuId = request.get(0).getMenuId();
-            List<MenuItemGroup> groups = new ArrayList<>();
-            for (MenuItemGroupDetails groupResponse : request) {
-                MenuItemGroup group = new MenuItemGroup();
-                group.setId(groupResponse.getId() == 0 ? null : groupResponse.getId());
-                group.setMenuId(groupResponse.getMenuId());
-                group.setName(groupResponse.getName());
-                group.setPosition(groupResponse.getPosition());
-                groups.add(group);
-            }
-
-            menuItemGroupService.saveGroups(groups);
-
-            List<Integer> groupIds_toKeep = groups.stream().map(MenuItemGroup::getId).toList();
-            List<Integer> menuItemIds_toKeep = new ArrayList<>();
-
-            for (int i = 0; i < request.size(); i++) {
-                MenuItemGroupDetails groupDetails = request.get(i);
-                groupDetails.setId(groupIds_toKeep.get(i));
-                menuItemIds_toKeep.addAll(syncMenuItems(groupDetails));
-            }
-
-            allergenService.deleteUnusedMenuItemAllergens(menuItemIds_toKeep, menuId);
-            menuItemService.deleteUnusedMenuItems(menuItemIds_toKeep, menuId);
-
-            //add cascading delete - tbd based on how the drag n drop will change?
-            menuItemGroupService.deleteUnusedGroups(groupIds_toKeep, menuId);
-
-            return request;
-        }
-
+        return response;
     }
+
+    private List<Integer> syncMenuItems(MenuItemGroupDetails groupDetails) {
+
+        List<MenuItem> menuItems = groupDetails.getMenuItems().stream().map(menuItemDetails -> {
+            MenuItem mi = new MenuItem(menuItemDetails);
+            mi.setMenuItemGroupId(groupDetails.getId());
+            return mi;
+        }).toList();
+        menuItemService.saveMenuItems(menuItems);
+
+        List<Integer> ids = menuItems.stream().map(MenuItem::getId).toList();
+        List<Integer> response = new ArrayList<>(ids);
+
+        List<MenuItemAllergen> MIAs_toSave = new ArrayList<>();
+
+        //Loop through group's menu items
+        for (int i = 0; i < groupDetails.getMenuItems().size(); i++) {
+            MenuItemDetails mid = groupDetails.getMenuItems().get(i);
+            mid.setId(ids.get(i));
+            mid.setMenuItemGroupId(groupDetails.getId());
+            MIAs_toSave.addAll(syncMenuItemAllergens(mid));
+        }
+        allergenService.saveMenuItemAllergens(MIAs_toSave);
+
+        return response;
+    }
+
+
+    @Transactional
+    public List<MenuItemGroupDetails> updateMenuContents(List<MenuItemGroupDetails> request) {
+        Integer menuId = request.get(0).getMenuId();
+        List<MenuItemGroup> groups = new ArrayList<>();
+        for (MenuItemGroupDetails groupResponse : request) {
+            MenuItemGroup group = new MenuItemGroup();
+            group.setId(groupResponse.getId() == 0 ? null : groupResponse.getId());
+            group.setMenuId(groupResponse.getMenuId());
+            group.setName(groupResponse.getName());
+            group.setPosition(groupResponse.getPosition());
+            groups.add(group);
+        }
+
+        menuItemGroupService.saveGroups(groups);
+
+        List<Integer> groupIds_toKeep = groups.stream().map(MenuItemGroup::getId).toList();
+        List<Integer> menuItemIds_toKeep = new ArrayList<>();
+
+        for (int i = 0; i < request.size(); i++) {
+            MenuItemGroupDetails groupDetails = request.get(i);
+            groupDetails.setId(groupIds_toKeep.get(i));
+            menuItemIds_toKeep.addAll(syncMenuItems(groupDetails));
+        }
+
+        allergenService.deleteUnusedMenuItemAllergens(menuItemIds_toKeep, menuId);
+        menuItemService.deleteUnusedMenuItems(menuItemIds_toKeep, menuId);
+
+        //add cascading delete - tbd based on how the drag n drop will change?
+        menuItemGroupService.deleteUnusedGroups(groupIds_toKeep, menuId);
+
+        return request;
+    }
+
+}

@@ -17,6 +17,7 @@ public class HealthController {
 
     @Autowired
     private RestaurantRepo restaurantRepo;
+
     @GetMapping(value = "ping")
     public ResponseEntity<String> ping() {
         return new ResponseEntity<>("pong", HttpStatus.OK);

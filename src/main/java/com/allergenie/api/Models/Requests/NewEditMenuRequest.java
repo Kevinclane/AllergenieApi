@@ -10,5 +10,6 @@ public class NewEditMenuRequest {
     private Integer id;
     private String name;
     private Boolean isActive;
+    private Integer cloneOptionId;
     private List<Integer> restaurantIds;
 }

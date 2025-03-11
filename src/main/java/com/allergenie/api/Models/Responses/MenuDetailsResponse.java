@@ -3,6 +3,7 @@ package com.allergenie.api.Models.Responses;
 import com.allergenie.api.Models.Entities.Restaurant;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 import java.util.List;
 
 @Data

@@ -1,7 +1,7 @@
 package com.allergenie.api.Services;
 
 import com.allergenie.api.Models.Entities.Restaurant;
-import com.allergenie.api.Repos.RestaurantJdbRepo;
+import com.allergenie.api.Repos.RestaurantJdbcRepo;
 import com.allergenie.api.Repos.RestaurantRepo;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -14,14 +14,14 @@ import java.util.Optional;
 public class RestaurantService {
 
     private RestaurantRepo restaurantRepo;
-    private RestaurantJdbRepo restaurantJdbRepo;
+    private RestaurantJdbcRepo restaurantJdbcRepo;
 
     public RestaurantService(
             RestaurantRepo restaurantRepo,
-            RestaurantJdbRepo restaurantJdbRepo
+            RestaurantJdbcRepo restaurantJdbcRepo
     ) {
         this.restaurantRepo = restaurantRepo;
-        this.restaurantJdbRepo = restaurantJdbRepo;
+        this.restaurantJdbcRepo = restaurantJdbcRepo;
     }
 
     public List<Restaurant> getRestaurants() {
@@ -35,15 +35,15 @@ public class RestaurantService {
     }
 
     public List<Restaurant> getByMenuId(Integer menuId) {
-        List<Restaurant> restaurants = restaurantJdbRepo.getRestaurantsByMenuId(menuId);
+        List<Restaurant> restaurants = restaurantJdbcRepo.getRestaurantsByMenuId(menuId);
         return restaurants;
     }
 
     public Restaurant saveRestaurant(Restaurant restaurant) throws Exception {
-        if(restaurant.getId().equals(0)) {
+        if (restaurant.getId().equals(0)) {
             restaurant.setId(null);
         }
-        if(restaurant.isValid()) {
+        if (restaurant.isValid()) {
             return restaurantRepo.save(restaurant);
 
         } else {

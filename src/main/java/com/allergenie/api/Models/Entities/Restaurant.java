@@ -34,36 +34,36 @@ public class Restaurant {
     public Restaurant(ResultSet rs) throws SQLException {
         this.id = rs.getInt("id");
         this.name = rs.getString("name");
-        this.phoneNumber = rs.getString("phoneNumber");
-        this.emailAddress = rs.getString("emailAddress");
-        this.streetAddress = rs.getString("streetAddress");
-        this.streetAddressTwo = rs.getString("streetAddressTwo");
+        this.phoneNumber = rs.getString("phone_number");
+        this.emailAddress = rs.getString("email_address");
+        this.streetAddress = rs.getString("street_address");
+        this.streetAddressTwo = rs.getString("street_address_two");
         this.city = rs.getString("city");
         this.state = rs.getString("state");
-        this.zipCode = rs.getString("zipCode");
+        this.zipCode = rs.getString("zip_code");
         this.details = rs.getString("details");
     }
 
     public boolean isValid() {
-        if(this.name.isEmpty() || this.name.length() > 150) {
+        if (this.name.isEmpty() || this.name.length() > 150) {
             return false;
         }
-        if(this.phoneNumber.isEmpty() || this.phoneNumber.length() > 10) {
+        if (this.phoneNumber.isEmpty() || this.phoneNumber.length() > 10) {
             return false;
         }
-        if(!isValidEmailAddress(this.emailAddress)) {
+        if (!isValidEmailAddress(this.emailAddress)) {
             return false;
         }
-        if(this.streetAddress.isEmpty() || this.streetAddress.length() > 50) {
+        if (this.streetAddress.isEmpty() || this.streetAddress.length() > 50) {
             return false;
         }
-        if(this.city.isEmpty() || this.city.length() > 45) {
+        if (this.city.isEmpty() || this.city.length() > 45) {
             return false;
         }
-        if(this.state.isEmpty() || this.state.length() > 2) {
+        if (this.state.isEmpty() || this.state.length() > 2) {
             return false;
         }
-        if(this.zipCode.length() != 5) {
+        if (this.zipCode.length() != 5) {
             return false;
         }
         return true;
