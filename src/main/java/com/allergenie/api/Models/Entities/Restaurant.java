@@ -45,25 +45,25 @@ public class Restaurant {
     }
 
     public boolean isValid() {
-        if(this.name.isEmpty() || this.name.length() > 150) {
+        if (this.name.isEmpty() || this.name.length() > 150) {
             return false;
         }
-        if(this.phoneNumber.isEmpty() || this.phoneNumber.length() > 10) {
+        if (this.phoneNumber.isEmpty() || this.phoneNumber.length() > 10) {
             return false;
         }
-        if(!isValidEmailAddress(this.emailAddress)) {
+        if (!isValidEmailAddress(this.emailAddress)) {
             return false;
         }
-        if(this.streetAddress.isEmpty() || this.streetAddress.length() > 50) {
+        if (this.streetAddress.isEmpty() || this.streetAddress.length() > 50) {
             return false;
         }
-        if(this.city.isEmpty() || this.city.length() > 45) {
+        if (this.city.isEmpty() || this.city.length() > 45) {
             return false;
         }
-        if(this.state.isEmpty() || this.state.length() > 2) {
+        if (this.state.isEmpty() || this.state.length() > 2) {
             return false;
         }
-        if(this.zipCode.length() != 5) {
+        if (this.zipCode.length() != 5) {
             return false;
         }
         return true;

@@ -72,7 +72,7 @@ public class MenuController {
     @DeleteMapping("/delete/{menuId}")
     public ResponseEntity<String> deleteMenu(@PathVariable Integer menuId) {
         try {
-            if(menuId == 0) {
+            if (menuId == 0) {
                 return new ResponseEntity<>("Invalid menuId", HttpStatus.BAD_REQUEST);
             }
             return new ResponseEntity<>("You hit the API!", HttpStatus.OK);

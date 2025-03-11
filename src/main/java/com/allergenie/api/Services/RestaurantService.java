@@ -40,10 +40,10 @@ public class RestaurantService {
     }
 
     public Restaurant saveRestaurant(Restaurant restaurant) throws Exception {
-        if(restaurant.getId().equals(0)) {
+        if (restaurant.getId().equals(0)) {
             restaurant.setId(null);
         }
-        if(restaurant.isValid()) {
+        if (restaurant.isValid()) {
             return restaurantRepo.save(restaurant);
 
         } else {
