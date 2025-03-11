@@ -10,16 +10,16 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class RestaurantJdbRepo {
+public class RestaurantJdbcRepo implements RestaurantJdbcRepoImpl {
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Autowired
-    public RestaurantJdbRepo(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
+    public RestaurantJdbcRepo(NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     public List<Restaurant> getRestaurantsByMenuId(Integer menuId) {
-        String query = "SELECT r.id, r.name, r.phone_number, r.email_address, r.street_address, r.street_address_two, r.city, r.state, r.zip_code FROM restaurant r " +
+        String query = "SELECT r.id, r.name, r.phone_number, r.email_address, r.street_address, r.street_address_two, r.city, r.state, r.zip_code, r.details FROM restaurant r " +
                 "JOIN restaurant_menu_crosswalk rmc ON r.id = rmc.restaurant_id " +
                 "WHERE rmc.menu_id = :menuId;";
         SqlParameterSource parameters = new MapSqlParameterSource()

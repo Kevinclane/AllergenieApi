@@ -34,13 +34,13 @@ public class Restaurant {
     public Restaurant(ResultSet rs) throws SQLException {
         this.id = rs.getInt("id");
         this.name = rs.getString("name");
-        this.phoneNumber = rs.getString("phoneNumber");
-        this.emailAddress = rs.getString("emailAddress");
-        this.streetAddress = rs.getString("streetAddress");
-        this.streetAddressTwo = rs.getString("streetAddressTwo");
+        this.phoneNumber = rs.getString("phone_number");
+        this.emailAddress = rs.getString("email_address");
+        this.streetAddress = rs.getString("street_address");
+        this.streetAddressTwo = rs.getString("street_address_two");
         this.city = rs.getString("city");
         this.state = rs.getString("state");
-        this.zipCode = rs.getString("zipCode");
+        this.zipCode = rs.getString("zip_code");
         this.details = rs.getString("details");
     }
 

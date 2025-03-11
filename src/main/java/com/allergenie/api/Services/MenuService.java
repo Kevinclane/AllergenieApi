@@ -52,6 +52,14 @@ public class MenuService {
 
     public Menu createMenu(NewEditMenuRequest request) {
         Menu menu = new Menu(request.getName());
+
+        if(!request.getCloneOptionId().equals(0)) {
+            Menu cloneMenu = menuRepo.findById(request.getCloneOptionId())
+                    .orElseThrow();
+            menu.setName(cloneMenu.getName());
+            menu.setIsActive(cloneMenu.getIsActive());
+        }
+
         menuRepo.save(menu);
 
         for (Integer restaurantId : request.getRestaurantIds()) {
