@@ -63,6 +63,8 @@ public class MenuService {
             menuId = cloneMenu.getId();
         }
 
+        //!TODO need to add cascading clone for menu_items and menu_item_allergens
+
         if (request.getIsLinked()) {
             Menu menu = new Menu();
             menu.setId(menuId);
@@ -82,14 +84,19 @@ public class MenuService {
             return menu;
 
         } else {
-            List<Menu> menusToSave = new ArrayList<>();
             List<RestaurantMenuCrosswalk> crosswalksToSave = new ArrayList<>();
+            Menu mainMenu = new Menu();
+
             for (Integer restaurantId : request.getRestaurantIds()) {
                 Menu menu = new Menu();
                 menu.setName(menuName);
                 menu.setIsActive(isActive);
                 menu.setIsLinked(false);
-                menusToSave.add(menu);
+                menuRepo.save(menu);
+
+                if(restaurantId.equals(request.getBaseRestaurantId())) {
+                    mainMenu = menu;
+                }
 
                 RestaurantMenuCrosswalk crosswalk = new RestaurantMenuCrosswalk();
                 crosswalk.setMenuId(menu.getId());
@@ -98,17 +105,8 @@ public class MenuService {
             }
 
             restaurantMenuCrosswalkRepo.saveAll(crosswalksToSave);
-            menuRepo.saveAll(menusToSave);
 
-            RestaurantMenuCrosswalk mainCrosswalk = crosswalksToSave.stream()
-                    .filter(crosswalk -> crosswalk.getRestaurantId().equals(request.getBaseRestaurantId()))
-                    .findFirst()
-                    .orElseThrow();
-
-            return menusToSave.stream()
-                    .filter(menu -> menu.getId().equals(mainCrosswalk.getMenuId()))
-                    .findFirst()
-                    .orElseThrow();
+            return mainMenu;
         }
     }
 

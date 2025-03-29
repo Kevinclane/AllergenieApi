@@ -211,47 +211,26 @@ public class MenuServiceTests {
                         .isLinked(request.getIsLinked())
                         .build();
 
-                List<Menu> menus = asList(
-                        Menu.builder()
-                                .id(null)
-                                .name(cloneMenu.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build(),
-                        Menu.builder()
-                                .id(null)
-                                .name(cloneMenu.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build(),
-                        Menu.builder()
-                                .id(null)
-                                .name(cloneMenu.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build()
-                );
-
                 List<RestaurantMenuCrosswalk> crosswalks = asList(
                         RestaurantMenuCrosswalk.builder()
                                 .id(null)
-                                .menuId(null)
+                                .menuId(menuIds.get(0))
                                 .restaurantId(restaurantIds.get(0))
                                 .build(),
                         RestaurantMenuCrosswalk.builder()
                                 .id(null)
-                                .menuId(null)
+                                .menuId(menuIds.get(1))
                                 .restaurantId(restaurantIds.get(1))
                                 .build(),
                         RestaurantMenuCrosswalk.builder()
                                 .id(null)
-                                .menuId(null)
+                                .menuId(menuIds.get(2))
                                 .restaurantId(restaurantIds.get(2))
                                 .build()
                 );
 
                 when(menuRepo.findById(cloneMenuId))
-                        .thenReturn(Optional.ofNullable(cloneMenu));
+                        .thenReturn(Optional.of(cloneMenu));
 
                 when(restaurantMenuCrosswalkRepo.saveAll(crosswalks))
                         .thenAnswer(args -> {
@@ -263,13 +242,19 @@ public class MenuServiceTests {
                             return xwalks;
                         });
 
-                when(menuRepo.saveAll(menus))
+                when(menuRepo.save(any()))
                         .thenAnswer(args -> {
-                            List<Menu> ms = args.getArgument(0);
-                            for (int i = 0; i < ms.size(); i++) {
-                                ms.get(i).setId(menuIds.get(i));
-                            }
-                            return ms;
+                            Menu m = args.getArgument(0);
+                            m.setId(menuIds.get(0));
+                            return m;
+                        }).thenAnswer(args -> {
+                            Menu m = args.getArgument(0);
+                            m.setId(menuIds.get(1));
+                            return m;
+                        }).thenAnswer(args -> {
+                            Menu m = args.getArgument(0);
+                            m.setId(menuIds.get(2));
+                            return m;
                         });
 
                 List<RestaurantMenuCrosswalk> expectedCrosswalks = asList(
@@ -290,34 +275,16 @@ public class MenuServiceTests {
                                 .build()
                 );
 
-                List<Menu> expectedMenus = asList(
-                        Menu.builder()
-                                .id(menuIds.get(0))
-                                .name(cloneMenu.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build(),
-                        Menu.builder()
-                                .id(menuIds.get(1))
-                                .name(cloneMenu.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build(),
-                        Menu.builder()
-                                .id(menuIds.get(2))
-                                .name(cloneMenu.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build()
-                );
-
-
-                Menu expected = expectedMenus.get(0);
+                Menu expected = Menu.builder()
+                        .id(menuIds.get(0))
+                        .name(cloneMenu.getName())
+                        .isActive(request.getIsActive())
+                        .isLinked(request.getIsLinked())
+                        .build();
 
                 Menu actual = service.createMenu(request);
 
                 assertEquals(expected, actual);
-                verify(menuRepo).saveAll(expectedMenus);
                 verify(restaurantMenuCrosswalkRepo).saveAll(expectedCrosswalks);
             }
         }
@@ -329,7 +296,6 @@ public class MenuServiceTests {
             public void whenIsLinkedIsTrue_shouldSaveOneMenuAndManyCrosswalks() {
                 Integer menuId = 69;
                 List<Integer> restaurantIds = asList(20, 21, 22);
-                List<Integer> crosswalkIds = asList(10, 11, 12);
 
                 NewEditMenuRequest request = NewEditMenuRequest.builder()
                         .id(null)
@@ -373,34 +339,6 @@ public class MenuServiceTests {
                             return m;
                         });
 
-                when(restaurantMenuCrosswalkRepo.saveAll(crosswalks))
-                        .thenAnswer(args -> {
-                            List<RestaurantMenuCrosswalk> xwalks = args.getArgument(0);
-                            for (int i = 0; i < xwalks.size(); i++) {
-                                xwalks.get(i).setId(crosswalkIds.get(i));
-                                xwalks.get(i).setMenuId(menuId);
-                            }
-                            return xwalks;
-                        });
-
-                List<RestaurantMenuCrosswalk> expectedCrosswalks = asList(
-                        RestaurantMenuCrosswalk.builder()
-                                .id(crosswalkIds.get(0))
-                                .menuId(menuId)
-                                .restaurantId(restaurantIds.get(0))
-                                .build(),
-                        RestaurantMenuCrosswalk.builder()
-                                .id(crosswalkIds.get(1))
-                                .menuId(menuId)
-                                .restaurantId(restaurantIds.get(1))
-                                .build(),
-                        RestaurantMenuCrosswalk.builder()
-                                .id(crosswalkIds.get(2))
-                                .menuId(menuId)
-                                .restaurantId(restaurantIds.get(2))
-                                .build()
-                );
-
                 Menu expected = Menu.builder()
                         .id(menuId)
                         .name(request.getName())
@@ -412,14 +350,13 @@ public class MenuServiceTests {
 
                 assertEquals(expected, actual);
                 verify(menuRepo).save(expected);
-                verify(restaurantMenuCrosswalkRepo).saveAll(expectedCrosswalks);
+                verify(restaurantMenuCrosswalkRepo).saveAll(crosswalks);
             }
 
             @Test
             public void whenIsLinkedIsFalse_shouldSaveManyMenusAndManyCrosswalks() {
                 List<Integer> menuIds = asList(69, 70, 71);
                 List<Integer> restaurantIds = asList(20, 21, 22);
-                List<Integer> crosswalkIds = asList(10, 11, 12);
 
                 NewEditMenuRequest request = NewEditMenuRequest.builder()
                         .id(null)
@@ -431,111 +368,49 @@ public class MenuServiceTests {
                         .restaurantIds(restaurantIds)
                         .build();
 
-                List<Menu> menus = asList(
-                        Menu.builder()
-                                .id(null)
-                                .name(request.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build(),
-                        Menu.builder()
-                                .id(null)
-                                .name(request.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build(),
-                        Menu.builder()
-                                .id(null)
-                                .name(request.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build()
-                );
-
                 List<RestaurantMenuCrosswalk> crosswalks = asList(
                         RestaurantMenuCrosswalk.builder()
                                 .id(null)
-                                .menuId(null)
-                                .restaurantId(restaurantIds.get(0))
-                                .build(),
-                        RestaurantMenuCrosswalk.builder()
-                                .id(null)
-                                .menuId(null)
-                                .restaurantId(restaurantIds.get(1))
-                                .build(),
-                        RestaurantMenuCrosswalk.builder()
-                                .id(null)
-                                .menuId(null)
-                                .restaurantId(restaurantIds.get(2))
-                                .build()
-                );
-
-                when(restaurantMenuCrosswalkRepo.saveAll(crosswalks))
-                        .thenAnswer(args -> {
-                            List<RestaurantMenuCrosswalk> xwalks = args.getArgument(0);
-                            for (int i = 0; i < xwalks.size(); i++) {
-                                xwalks.get(i).setId(crosswalkIds.get(i));
-                                xwalks.get(i).setMenuId(menuIds.get(i));
-                            }
-                            return xwalks;
-                        });
-
-                when(menuRepo.saveAll(menus))
-                        .thenAnswer(args -> {
-                            List<Menu> ms = args.getArgument(0);
-                            for (int i = 0; i < ms.size(); i++) {
-                                ms.get(i).setId(menuIds.get(i));
-                            }
-                            return ms;
-                        });
-
-                List<RestaurantMenuCrosswalk> expectedCrosswalks = asList(
-                        RestaurantMenuCrosswalk.builder()
-                                .id(crosswalkIds.get(0))
                                 .menuId(menuIds.get(0))
                                 .restaurantId(restaurantIds.get(0))
                                 .build(),
                         RestaurantMenuCrosswalk.builder()
-                                .id(crosswalkIds.get(1))
+                                .id(null)
                                 .menuId(menuIds.get(1))
                                 .restaurantId(restaurantIds.get(1))
                                 .build(),
                         RestaurantMenuCrosswalk.builder()
-                                .id(crosswalkIds.get(2))
+                                .id(null)
                                 .menuId(menuIds.get(2))
                                 .restaurantId(restaurantIds.get(2))
                                 .build()
                 );
 
-                List<Menu> expectedMenus = asList(
-                        Menu.builder()
-                                .id(menuIds.get(0))
-                                .name(request.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build(),
-                        Menu.builder()
-                                .id(menuIds.get(1))
-                                .name(request.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build(),
-                        Menu.builder()
-                                .id(menuIds.get(2))
-                                .name(request.getName())
-                                .isActive(request.getIsActive())
-                                .isLinked(request.getIsLinked())
-                                .build()
-                );
+                when(menuRepo.save(any()))
+                        .thenAnswer(args -> {
+                            Menu m = args.getArgument(0);
+                            m.setId(menuIds.get(0));
+                            return m;
+                        }).thenAnswer(args -> {
+                            Menu m = args.getArgument(0);
+                            m.setId(menuIds.get(1));
+                            return m;
+                        }).thenAnswer(args -> {
+                            Menu m = args.getArgument(0);
+                            m.setId(menuIds.get(2));
+                            return m;
+                        });
 
-
-                Menu expected = expectedMenus.get(0);
-
+                Menu expected = Menu.builder()
+                        .id(menuIds.get(0))
+                        .name(request.getName())
+                        .isActive(request.getIsActive())
+                        .isLinked(request.getIsLinked())
+                        .build();
                 Menu actual = service.createMenu(request);
 
                 assertEquals(expected, actual);
-                verify(menuRepo).saveAll(expectedMenus);
-                verify(restaurantMenuCrosswalkRepo).saveAll(expectedCrosswalks);
+                verify(restaurantMenuCrosswalkRepo).saveAll(crosswalks);
             }
         }
 
