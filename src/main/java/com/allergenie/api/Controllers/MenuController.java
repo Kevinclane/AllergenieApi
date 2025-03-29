@@ -69,13 +69,11 @@ public class MenuController {
         }
     }
 
-    @DeleteMapping("/delete/{menuId}")
+    @DeleteMapping("/{menuId}")
     public ResponseEntity<String> deleteMenu(@PathVariable Integer menuId) {
         try {
-            if (menuId == 0) {
-                return new ResponseEntity<>("Invalid menuId", HttpStatus.BAD_REQUEST);
-            }
-            return new ResponseEntity<>("You hit the API!", HttpStatus.OK);
+            menuService.deleteMenuById(menuId);
+            return new ResponseEntity<>("Menu deleted successfully", HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

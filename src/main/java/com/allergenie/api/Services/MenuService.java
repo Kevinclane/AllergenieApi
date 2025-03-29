@@ -11,9 +11,9 @@ import com.allergenie.api.Repos.RestaurantMenuCrosswalkRepo;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
+import static java.util.stream.Collectors.toList;
 
 @Transactional
 @Service
@@ -51,56 +51,151 @@ public class MenuService {
     }
 
     public Menu createMenu(NewEditMenuRequest request) {
-        Menu menu = new Menu(request.getName());
+        Integer menuId = null;
+        String menuName = request.getName();
+        Boolean isActive = request.getIsActive();
 
         if (!request.getCloneOptionId().equals(0)) {
             Menu cloneMenu = menuRepo.findById(request.getCloneOptionId())
                     .orElseThrow();
-            menu.setName(cloneMenu.getName());
-            menu.setIsActive(cloneMenu.getIsActive());
+            menuName = cloneMenu.getName();
+            isActive = cloneMenu.getIsActive();
+            menuId = cloneMenu.getId();
         }
 
-        menuRepo.save(menu);
+        if (request.getIsLinked()) {
+            Menu menu = new Menu();
+            menu.setId(menuId);
+            menu.setName(menuName);
+            menu.setIsActive(isActive);
+            menu.setIsLinked(true);
+            menuRepo.save(menu);
 
-        for (Integer restaurantId : request.getRestaurantIds()) {
-            RestaurantMenuCrosswalk crosswalk = new RestaurantMenuCrosswalk();
-            crosswalk.setMenuId(menu.getId());
-            crosswalk.setRestaurantId(restaurantId);
-            restaurantMenuCrosswalkRepo.save(crosswalk);
-        }
-
-        return menu;
-    }
-
-    public Menu updateMenu(NewEditMenuRequest request) {
-        Menu menu = new Menu(request.getId(), request.getName(), request.getIsActive());
-        menuRepo.save(menu);
-
-        List<RestaurantMenuCrosswalk> existingCrosswalks = restaurantMenuCrosswalkRepo.findByMenuId(menu.getId());
-        List<RestaurantMenuCrosswalk> shouldDelete = new ArrayList<>();
-        List<RestaurantMenuCrosswalk> shouldSave = new ArrayList<>();
-
-        for (RestaurantMenuCrosswalk crosswalk : existingCrosswalks) {
-            if (!request.getRestaurantIds().contains(crosswalk.getRestaurantId())) {
-                shouldDelete.add(crosswalk);
-            }
-        }
-
-        for (Integer restaurantId : request.getRestaurantIds()) {
-            boolean exists = existingCrosswalks.stream()
-                    .anyMatch(crosswalk -> crosswalk.getRestaurantId().equals(restaurantId));
-            if (!exists) {
+            List<RestaurantMenuCrosswalk> crosswalksToSave = new ArrayList<>();
+            for (Integer restaurantId : request.getRestaurantIds()) {
                 RestaurantMenuCrosswalk crosswalk = new RestaurantMenuCrosswalk();
                 crosswalk.setMenuId(menu.getId());
                 crosswalk.setRestaurantId(restaurantId);
-                shouldSave.add(crosswalk);
+                crosswalksToSave.add(crosswalk);
+            }
+            restaurantMenuCrosswalkRepo.saveAll(crosswalksToSave);
+            return menu;
+
+        } else {
+            List<Menu> menusToSave = new ArrayList<>();
+            List<RestaurantMenuCrosswalk> crosswalksToSave = new ArrayList<>();
+            for (Integer restaurantId : request.getRestaurantIds()) {
+                Menu menu = new Menu();
+                menu.setName(menuName);
+                menu.setIsActive(isActive);
+                menu.setIsLinked(false);
+                menusToSave.add(menu);
+
+                RestaurantMenuCrosswalk crosswalk = new RestaurantMenuCrosswalk();
+                crosswalk.setMenuId(menu.getId());
+                crosswalk.setRestaurantId(restaurantId);
+                crosswalksToSave.add(crosswalk);
+            }
+
+            restaurantMenuCrosswalkRepo.saveAll(crosswalksToSave);
+            menuRepo.saveAll(menusToSave);
+
+            RestaurantMenuCrosswalk mainCrosswalk = crosswalksToSave.stream()
+                    .filter(crosswalk -> crosswalk.getRestaurantId().equals(request.getBaseRestaurantId()))
+                    .findFirst()
+                    .orElseThrow();
+
+            return menusToSave.stream()
+                    .filter(menu -> menu.getId().equals(mainCrosswalk.getMenuId()))
+                    .findFirst()
+                    .orElseThrow();
+        }
+    }
+
+    private List<RestaurantMenuCrosswalk> deleteUnusedCrosswalks(List<RestaurantMenuCrosswalk> crosswalksToSave, List<Integer> restaurantIds) {
+        List<RestaurantMenuCrosswalk> crosswalksToDelete = new ArrayList<>();
+
+        for (RestaurantMenuCrosswalk crosswalk : crosswalksToSave) {
+            if (!restaurantIds.contains(crosswalk.getRestaurantId())) {
+                crosswalksToDelete.add(crosswalk);
             }
         }
 
-        restaurantMenuCrosswalkRepo.deleteAllInBatch(shouldDelete);
-        restaurantMenuCrosswalkRepo.saveAll(shouldSave);
+        crosswalksToSave.removeAll(crosswalksToDelete);
 
-        return menu;
+        restaurantMenuCrosswalkRepo.deleteAll(crosswalksToDelete);
+        return crosswalksToSave;
+    }
+
+    private void createCrosswalks(List<Integer> existingRestaurantIds, NewEditMenuRequest request, List<RestaurantMenuCrosswalk> crosswalksToSave) {
+
+        for (Integer restaurantId : request.getRestaurantIds()) {
+            if (!existingRestaurantIds.contains(restaurantId)) {
+                RestaurantMenuCrosswalk newCrosswalk = new RestaurantMenuCrosswalk();
+                newCrosswalk.setRestaurantId(restaurantId);
+
+                if (request.getIsLinked()) {
+                    newCrosswalk.setMenuId(request.getId());
+                } else {
+                    Menu newMenu = Menu.builder()
+                            .name(request.getName())
+                            .isActive(request.getIsActive())
+                            .isLinked(request.getIsLinked())
+                            .build();
+                    menuRepo.save(newMenu);
+                    newCrosswalk.setMenuId(newMenu.getId());
+                }
+
+                crosswalksToSave.add(newCrosswalk);
+            }
+        }
+
+        restaurantMenuCrosswalkRepo.saveAll(crosswalksToSave);
+    }
+
+    private void updateCrosswalks(List<RestaurantMenuCrosswalk> crosswalksToSave, NewEditMenuRequest request, Menu existingMenu, Boolean previousIsLinked) {
+        List<Integer> existingRestaurantIds = crosswalksToSave.stream().map(RestaurantMenuCrosswalk::getRestaurantId).toList();
+        crosswalksToSave = deleteUnusedCrosswalks(crosswalksToSave, request.getRestaurantIds());
+
+        if (previousIsLinked && !request.getIsLinked()) {
+            for (RestaurantMenuCrosswalk crosswalk : crosswalksToSave) {
+                if (!Objects.equals(crosswalk.getRestaurantId(), request.getBaseRestaurantId())) {
+                    Menu newMenu = Menu.builder()
+                            .name(request.getName())
+                            .isActive(request.getIsActive())
+                            .isLinked(request.getIsLinked())
+                            .build();
+                    menuRepo.save(newMenu);
+                    crosswalk.setMenuId(newMenu.getId());
+                }
+            }
+        }
+
+        createCrosswalks(existingRestaurantIds, request, crosswalksToSave);
+    }
+
+    @Transactional
+    public Menu updateMenu(NewEditMenuRequest request) throws Exception {
+
+        Menu existingMenu = menuRepo.findById(request.getId())
+                .orElseThrow(() -> new Exception("Menu not found for menuId: " + request.getId()));
+
+        List<RestaurantMenuCrosswalk> crosswalksToSave = restaurantMenuCrosswalkRepo.findByMenuId(request.getId());
+        crosswalksToSave = new ArrayList<>(crosswalksToSave);
+
+        if (request.getRestaurantIds().size() == 0) {
+            throw new Exception("Restaurant Ids must be provided to update menu");
+        }
+
+        Boolean previousIsLinked = existingMenu.getIsLinked();
+
+        existingMenu.setName(request.getName());
+        existingMenu.setIsActive(request.getIsActive());
+        existingMenu.setIsLinked(request.getIsLinked());
+        menuRepo.save(existingMenu);
+
+        updateCrosswalks(crosswalksToSave, request, existingMenu, previousIsLinked);
+        return existingMenu;
     }
 
     public MenuDetailsResponse getMenuDetails(Integer menuId) {
@@ -116,6 +211,7 @@ public class MenuService {
             menuResponse.setId(menu.get().getId());
             menuResponse.setName(menu.get().getName());
             menuResponse.setIsActive(menu.get().getIsActive());
+            menuResponse.setIsLinked(menu.get().getIsLinked());
 
             List<Restaurant> linkedRestaurants = restaurantService.getByMenuId(menuId);
             menuResponse.setLinkedRestaurants(linkedRestaurants);
@@ -126,7 +222,7 @@ public class MenuService {
 
     private List<MenuItemAllergen> syncMenuItemAllergens(MenuItemDetails mid) {
         List<MenuItemAllergen> response = new ArrayList<>();
-        List<MenuItemAllergen> linkedMIAs = allergenService.getAllByMenuItemId(mid.getId());
+        List<MenuItemAllergen> linkedMIAs = new ArrayList<>(allergenService.getAllByMenuItemId(mid.getId()));
 
         //loop through all allergens in menu item
         for (Allergen a : mid.getAllergens()) {
@@ -180,7 +276,6 @@ public class MenuService {
         return response;
     }
 
-
     @Transactional
     public List<MenuItemGroupDetails> updateMenuContents(List<MenuItemGroupDetails> request) {
         Integer menuId = request.get(0).getMenuId();
@@ -214,4 +309,7 @@ public class MenuService {
         return request;
     }
 
+    public void deleteMenuById(Integer menuId) {
+        menuJdbcRepo.deleteMenuAndChildren(menuId);
+    }
 }
