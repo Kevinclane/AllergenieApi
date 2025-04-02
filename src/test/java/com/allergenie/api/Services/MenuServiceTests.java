@@ -96,7 +96,8 @@ public class MenuServiceTests {
         public class WhenCloneOptionIdIsPresent {
             @Test
             public void whenIsLinkedIsTrue_shouldSaveManyCrosswalksToCloneMenu() {
-                Integer menuId = 69;
+                Integer cloneMenuId = 69;
+                Integer newMenuId = 70;
                 List<Integer> restaurantIds = asList(20, 21, 22);
                 List<Integer> crosswalkIds = asList(10, 11, 12);
 
@@ -105,13 +106,13 @@ public class MenuServiceTests {
                         .name(null)
                         .isActive(true)
                         .isLinked(true)
-                        .cloneOptionId(menuId)
+                        .cloneOptionId(cloneMenuId)
                         .baseRestaurantId(20)
                         .restaurantIds(restaurantIds)
                         .build();
 
                 Menu cloneMenu = Menu.builder()
-                        .id(menuId)
+                        .id(cloneMenuId)
                         .name("Clone Menu")
                         .isActive(request.getIsActive())
                         .isLinked(request.getIsLinked())
@@ -120,28 +121,28 @@ public class MenuServiceTests {
                 List<RestaurantMenuCrosswalk> crosswalks = asList(
                         RestaurantMenuCrosswalk.builder()
                                 .id(null)
-                                .menuId(menuId)
+                                .menuId(newMenuId)
                                 .restaurantId(restaurantIds.get(0))
                                 .build(),
                         RestaurantMenuCrosswalk.builder()
                                 .id(null)
-                                .menuId(menuId)
+                                .menuId(newMenuId)
                                 .restaurantId(restaurantIds.get(1))
                                 .build(),
                         RestaurantMenuCrosswalk.builder()
                                 .id(null)
-                                .menuId(menuId)
+                                .menuId(newMenuId)
                                 .restaurantId(restaurantIds.get(2))
                                 .build()
                 );
 
-                when(menuRepo.findById(menuId))
+                when(menuRepo.findById(cloneMenuId))
                         .thenReturn(Optional.ofNullable(cloneMenu));
 
-                when(menuRepo.save(cloneMenu))
+                when(menuRepo.save(any()))
                         .thenAnswer(args -> {
                             Menu m = args.getArgument(0);
-                            m.setId(menuId);
+                            m.setId(newMenuId);
                             return m;
                         });
 
@@ -150,7 +151,7 @@ public class MenuServiceTests {
                             List<RestaurantMenuCrosswalk> xwalks = args.getArgument(0);
                             for (int i = 0; i < xwalks.size(); i++) {
                                 xwalks.get(i).setId(crosswalkIds.get(i));
-                                xwalks.get(i).setMenuId(menuId);
+                                xwalks.get(i).setMenuId(cloneMenuId);
                             }
                             return xwalks;
                         });
@@ -158,23 +159,23 @@ public class MenuServiceTests {
                 List<RestaurantMenuCrosswalk> expectedCrosswalks = asList(
                         RestaurantMenuCrosswalk.builder()
                                 .id(crosswalkIds.get(0))
-                                .menuId(menuId)
+                                .menuId(cloneMenuId)
                                 .restaurantId(restaurantIds.get(0))
                                 .build(),
                         RestaurantMenuCrosswalk.builder()
                                 .id(crosswalkIds.get(1))
-                                .menuId(menuId)
+                                .menuId(cloneMenuId)
                                 .restaurantId(restaurantIds.get(1))
                                 .build(),
                         RestaurantMenuCrosswalk.builder()
                                 .id(crosswalkIds.get(2))
-                                .menuId(menuId)
+                                .menuId(cloneMenuId)
                                 .restaurantId(restaurantIds.get(2))
                                 .build()
                 );
 
                 Menu expected = Menu.builder()
-                        .id(cloneMenu.getId())
+                        .id(newMenuId)
                         .name(cloneMenu.getName())
                         .isActive(cloneMenu.getIsActive())
                         .isLinked(cloneMenu.getIsLinked())
@@ -184,6 +185,7 @@ public class MenuServiceTests {
 
                 assertEquals(expected, actual);
                 verify(menuRepo).save(expected);
+                verify(menuItemService).cloneMenuChildren(newMenuId, cloneMenuId);
                 verify(restaurantMenuCrosswalkRepo).saveAll(expectedCrosswalks);
             }
 
@@ -285,6 +287,9 @@ public class MenuServiceTests {
                 Menu actual = service.createMenu(request);
 
                 assertEquals(expected, actual);
+                verify(menuItemService).cloneMenuChildren(menuIds.get(0), cloneMenuId);
+                verify(menuItemService).cloneMenuChildren(menuIds.get(1), cloneMenuId);
+                verify(menuItemService).cloneMenuChildren(menuIds.get(2), cloneMenuId);
                 verify(restaurantMenuCrosswalkRepo).saveAll(expectedCrosswalks);
             }
         }
@@ -710,6 +715,9 @@ public class MenuServiceTests {
 
                 assertEquals(expected, actual);
 
+                verify(menuItemService).cloneMenuChildren(menuIds.get(1), menuIds.get(0));
+                verify(menuItemService).cloneMenuChildren(menuIds.get(2), menuIds.get(0));
+                verify(menuItemService).cloneMenuChildren(menuIds.get(3), menuIds.get(0));
                 verify(restaurantMenuCrosswalkRepo).saveAll(asList(
                         firstExistingCrosswalk,
                         firstUpdatedCrosswalk,
@@ -890,6 +898,9 @@ public class MenuServiceTests {
                 Menu actual = service.updateMenu(request);
 
                 assertEquals(expected, actual);
+                verify(menuItemService).cloneMenuChildren(menuIds.get(1), menuIds.get(0));
+                verify(menuItemService).cloneMenuChildren(menuIds.get(2), menuIds.get(0));
+                verify(menuItemService).cloneMenuChildren(menuIds.get(3), menuIds.get(0));
                 verify(restaurantMenuCrosswalkRepo).saveAll(asList(
                         existingCrosswalk,
                         firstNewCrosswalk,

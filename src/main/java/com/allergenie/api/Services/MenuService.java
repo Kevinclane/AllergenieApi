@@ -54,8 +54,9 @@ public class MenuService {
         Integer menuId = null;
         String menuName = request.getName();
         Boolean isActive = request.getIsActive();
+        boolean shouldClone = !request.getCloneOptionId().equals(0);
 
-        if (!request.getCloneOptionId().equals(0)) {
+        if (shouldClone) {
             Menu cloneMenu = menuRepo.findById(request.getCloneOptionId())
                     .orElseThrow();
             menuName = cloneMenu.getName();
@@ -63,15 +64,16 @@ public class MenuService {
             menuId = cloneMenu.getId();
         }
 
-        //!TODO need to add cascading clone for menu_items and menu_item_allergens
-
         if (request.getIsLinked()) {
             Menu menu = new Menu();
-            menu.setId(menuId);
             menu.setName(menuName);
             menu.setIsActive(isActive);
             menu.setIsLinked(true);
             menuRepo.save(menu);
+
+            if (shouldClone) {
+                menuItemService.cloneMenuChildren(menu.getId(), menuId);
+            }
 
             List<RestaurantMenuCrosswalk> crosswalksToSave = new ArrayList<>();
             for (Integer restaurantId : request.getRestaurantIds()) {
@@ -94,7 +96,11 @@ public class MenuService {
                 menu.setIsLinked(false);
                 menuRepo.save(menu);
 
-                if(restaurantId.equals(request.getBaseRestaurantId())) {
+                if (shouldClone) {
+                    menuItemService.cloneMenuChildren(menu.getId(), menuId);
+                }
+
+                if (restaurantId.equals(request.getBaseRestaurantId())) {
                     mainMenu = menu;
                 }
 
@@ -141,6 +147,7 @@ public class MenuService {
                             .isLinked(request.getIsLinked())
                             .build();
                     menuRepo.save(newMenu);
+                    menuItemService.cloneMenuChildren(newMenu.getId(), request.getId());
                     newCrosswalk.setMenuId(newMenu.getId());
                 }
 
@@ -151,7 +158,7 @@ public class MenuService {
         restaurantMenuCrosswalkRepo.saveAll(crosswalksToSave);
     }
 
-    private void updateCrosswalks(List<RestaurantMenuCrosswalk> crosswalksToSave, NewEditMenuRequest request, Menu existingMenu, Boolean previousIsLinked) {
+    private void updateCrosswalks(List<RestaurantMenuCrosswalk> crosswalksToSave, NewEditMenuRequest request, Boolean previousIsLinked) {
         List<Integer> existingRestaurantIds = crosswalksToSave.stream().map(RestaurantMenuCrosswalk::getRestaurantId).toList();
         crosswalksToSave = deleteUnusedCrosswalks(crosswalksToSave, request.getRestaurantIds());
 
@@ -164,6 +171,7 @@ public class MenuService {
                             .isLinked(request.getIsLinked())
                             .build();
                     menuRepo.save(newMenu);
+                    menuItemService.cloneMenuChildren(newMenu.getId(), request.getId());
                     crosswalk.setMenuId(newMenu.getId());
                 }
             }
@@ -192,7 +200,7 @@ public class MenuService {
         existingMenu.setIsLinked(request.getIsLinked());
         menuRepo.save(existingMenu);
 
-        updateCrosswalks(crosswalksToSave, request, existingMenu, previousIsLinked);
+        updateCrosswalks(crosswalksToSave, request, previousIsLinked);
         return existingMenu;
     }
 

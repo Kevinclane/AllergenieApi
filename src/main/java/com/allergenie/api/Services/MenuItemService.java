@@ -3,10 +3,9 @@ package com.allergenie.api.Services;
 import com.allergenie.api.Models.Entities.Allergen;
 import com.allergenie.api.Models.Entities.MenuItem;
 import com.allergenie.api.Models.Entities.MenuItemAllergen;
+import com.allergenie.api.Models.Responses.LoadedMenuResponse;
 import com.allergenie.api.Models.Responses.MenuItemDetails;
 import com.allergenie.api.Models.Responses.MenuItemGroupDetails;
-import com.allergenie.api.Models.Responses.LoadedMenuResponse;
-import com.allergenie.api.Models.Rows.MenuItemGroupRow;
 import com.allergenie.api.Repos.MenuItemJdbcRepo;
 import com.allergenie.api.Repos.MenuItemRepo;
 import jakarta.transaction.Transactional;
@@ -74,5 +73,9 @@ public class MenuItemService {
 
     public void deleteUnusedMenuItems(List<Integer> existingMenuItemIds, Integer menuId) {
         menuItemRepo.deleteUnusedMenuItems(existingMenuItemIds, menuId);
+    }
+
+    public void cloneMenuChildren(Integer newMenuId, Integer originalMenuId) {
+        List<MenuItem> originalItems = menuItemRepo.findByMenuId(originalMenuId);
     }
 }
