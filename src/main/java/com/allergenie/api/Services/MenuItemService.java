@@ -3,35 +3,39 @@ package com.allergenie.api.Services;
 import com.allergenie.api.Models.Entities.Allergen;
 import com.allergenie.api.Models.Entities.MenuItem;
 import com.allergenie.api.Models.Entities.MenuItemAllergen;
+import com.allergenie.api.Models.Entities.MenuItemGroup;
 import com.allergenie.api.Models.Responses.LoadedMenuResponse;
 import com.allergenie.api.Models.Responses.MenuItemDetails;
 import com.allergenie.api.Models.Responses.MenuItemGroupDetails;
+import com.allergenie.api.Models.Rows.MenuItemAllergenGroupRow;
+import com.allergenie.api.Models.Rows.MenuItemGroupRow;
+import com.allergenie.api.Repos.MenuItemGroupRepo;
 import com.allergenie.api.Repos.MenuItemJdbcRepo;
 import com.allergenie.api.Repos.MenuItemRepo;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class MenuItemService {
-    private MenuItemRepo menuItemRepo;
     private AllergenService allergenService;
+    private MenuItemRepo menuItemRepo;
     private MenuItemJdbcRepo menuItemJdbcRepo;
+    private MenuItemGroupRepo menuItemGroupRepo;
 
     public MenuItemService(
-            MenuItemRepo menuItemRepo,
             AllergenService allergenService,
-            MenuItemJdbcRepo menuItemJdbcRepo
+            MenuItemRepo menuItemRepo,
+            MenuItemJdbcRepo menuItemJdbcRepo,
+            MenuItemGroupRepo menuItemGroupRepo
     ) {
-        this.menuItemRepo = menuItemRepo;
         this.allergenService = allergenService;
+        this.menuItemRepo = menuItemRepo;
         this.menuItemJdbcRepo = menuItemJdbcRepo;
+        this.menuItemGroupRepo = menuItemGroupRepo;
     }
 
     public List<MenuItem> getMenuItems(Integer menuId) {
@@ -50,15 +54,16 @@ public class MenuItemService {
         for (MenuItemGroupDetails group : responses) {
             for (MenuItemDetails item : group.getMenuItems()) {
                 List<MenuItemAllergen> linkedAllergens = allergenMap.get(item.getId());
-                if(linkedAllergens == null) {
+                if (linkedAllergens == null) {
                     continue;
                 }
-                List<Allergen> a = new ArrayList<>();
+                List<Allergen> la = new ArrayList<>();
 
-                for(MenuItemAllergen mia : linkedAllergens) {
-                    a = allergenService.getAllergens().stream().filter(x -> Objects.equals(x.getId(), mia.getAllergenId())).collect(Collectors.toList());
+                for (MenuItemAllergen mia : linkedAllergens) {
+                    Optional<Allergen> a = allergens.stream().filter(x -> x.getId().equals(mia.getAllergenId())).findFirst();
+                    a.ifPresent(la::add);
                 }
-                item.setAllergens(a);
+                item.setAllergens(la);
             }
         }
 
@@ -76,6 +81,38 @@ public class MenuItemService {
     }
 
     public void cloneMenuChildren(Integer newMenuId, Integer originalMenuId) {
-        List<MenuItem> originalItems = menuItemRepo.findByMenuId(originalMenuId);
+        List<MenuItemAllergenGroupRow> rows = menuItemJdbcRepo.getMenuItemAllergenGroups(originalMenuId);
+        Map<Integer, List<MenuItemAllergenGroupRow>> groupMap = rows.stream().collect(Collectors.groupingBy(MenuItemAllergenGroupRow::getGroupId));
+
+        for (Map.Entry<Integer, List<MenuItemAllergenGroupRow>> entry : groupMap.entrySet()) {
+            List<MenuItemAllergenGroupRow> groupRows = entry.getValue(); //all rows with same group
+
+            MenuItemGroup group = new MenuItemGroup(groupRows.get(0));
+            group.setId(null);
+            group.setMenuId(newMenuId);
+            menuItemGroupRepo.save(group);
+
+            Map<Integer, List<MenuItemAllergenGroupRow>> itemMap = groupRows.stream().collect(Collectors.groupingBy(MenuItemAllergenGroupRow::getMenuItemId));
+
+            for (Map.Entry<Integer, List<MenuItemAllergenGroupRow>> entry2 : itemMap.entrySet()) {
+                List<MenuItemAllergenGroupRow> itemRows = entry2.getValue(); //all rows with same item
+
+                MenuItem menuItem = new MenuItem(itemRows.get(0));
+                menuItem.setId(null);
+                menuItem.setMenuId(newMenuId);
+                menuItem.setMenuItemGroupId(group.getId());
+                menuItemRepo.save(menuItem);
+
+                List<MenuItemAllergen> allergens = new ArrayList<>();
+                for (MenuItemAllergenGroupRow r : itemRows) {
+                    MenuItemAllergen a = new MenuItemAllergen();
+                    a.setMenuItemId(menuItem.getId());
+                    a.setAllergenId(r.getAllergenId());
+                    allergens.add(a);
+                }
+                allergenService.saveMenuItemAllergens(allergens);
+            }
+
+        }
     }
 }

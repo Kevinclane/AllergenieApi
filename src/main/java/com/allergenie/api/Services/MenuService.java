@@ -265,15 +265,15 @@ public class MenuService {
         }).toList();
         menuItemService.saveMenuItems(menuItems);
 
-        List<Integer> ids = menuItems.stream().map(MenuItem::getId).toList();
-        List<Integer> response = new ArrayList<>(ids);
+        List<Integer> menuItemIds = menuItems.stream().map(MenuItem::getId).toList();
+        List<Integer> response = new ArrayList<>(menuItemIds);
 
         List<MenuItemAllergen> MIAs_toSave = new ArrayList<>();
 
         //Loop through group's menu items
-        for (int i = 0; i < groupDetails.getMenuItems().size(); i++) {
+        for (int i = 0; i < menuItems.size(); i++) {
             MenuItemDetails mid = groupDetails.getMenuItems().get(i);
-            mid.setId(ids.get(i));
+            mid.setId(menuItemIds.get(i));
             mid.setMenuItemGroupId(groupDetails.getId());
             MIAs_toSave.addAll(syncMenuItemAllergens(mid));
         }
@@ -309,7 +309,7 @@ public class MenuService {
         allergenService.deleteUnusedMenuItemAllergens(menuItemIds_toKeep, menuId);
         menuItemService.deleteUnusedMenuItems(menuItemIds_toKeep, menuId);
 
-        //add cascading delete - tbd based on how the drag n drop will change?
+        //!TODO add cascading delete - tbd based on how the drag n drop will change?
         menuItemGroupService.deleteUnusedGroups(groupIds_toKeep, menuId);
 
         return request;

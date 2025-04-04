@@ -43,6 +43,7 @@ public class MenuJdbcRepo implements MenuJdbcRepoImpl {
         String deleteAllergens = "DELETE FROM menu_item_allergen WHERE menu_item_id IN (SELECT id FROM temp_ids)";
         String deleteMenuItems = "DELETE FROM menu_item WHERE id IN (SELECT id FROM temp_ids)";
         String deleteCrosswalk = "DELETE FROM restaurant_menu_crosswalk WHERE menu_id = :menuId";
+        String deleteGroups = "DELETE FROM menu_item_group WHERE menu_id = :menuId";
         String deleteMenu = "DELETE FROM menu WHERE id = :menuId";
         String dropTempTable = "DROP TEMPORARY TABLE IF EXISTS temp_ids";
 
@@ -53,6 +54,7 @@ public class MenuJdbcRepo implements MenuJdbcRepoImpl {
         namedParameterJdbcTemplate.getJdbcTemplate().update(deleteAllergens);
         namedParameterJdbcTemplate.getJdbcTemplate().update(deleteMenuItems);
         namedParameterJdbcTemplate.update(deleteCrosswalk, parameterSource);
+        namedParameterJdbcTemplate.update(deleteGroups, parameterSource);
         namedParameterJdbcTemplate.update(deleteMenu, parameterSource);
         namedParameterJdbcTemplate.getJdbcTemplate().update(dropTempTable);
     }

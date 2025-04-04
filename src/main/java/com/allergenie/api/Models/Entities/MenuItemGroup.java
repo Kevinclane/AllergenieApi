@@ -1,5 +1,6 @@
 package com.allergenie.api.Models.Entities;
 
+import com.allergenie.api.Models.Rows.MenuItemAllergenGroupRow;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -22,4 +23,10 @@ public class MenuItemGroup {
     private String name;
     private Integer position;
 
+    public MenuItemGroup(MenuItemAllergenGroupRow row) {
+        this.id = row.getGroupId();
+        this.menuId = row.getMenuId();
+        this.name = row.getGroupName();
+        this.position = row. getGroupPosition();
+    }
 }

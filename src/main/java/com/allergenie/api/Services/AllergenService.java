@@ -35,8 +35,8 @@ public class AllergenService {
         return menuItemAllergenRepo.findAllByMenuItemId(menuItemId);
     }
 
-    public void saveMenuItemAllergens(List<MenuItemAllergen> miAsToKeep) {
-        menuItemAllergenRepo.saveAll(miAsToKeep);
+    public void saveMenuItemAllergens(List<MenuItemAllergen> menuItemAllergens) {
+        menuItemAllergenRepo.saveAll(menuItemAllergens);
     }
 
     public void deleteMenuItemAllergens(List<MenuItemAllergen> linkedMIAs) {
