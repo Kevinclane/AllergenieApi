@@ -4,6 +4,7 @@ import com.allergenie.api.Models.Entities.Menu;
 import com.allergenie.api.Models.Requests.NewEditMenuRequest;
 import com.allergenie.api.Models.Responses.MenuDetailsResponse;
 import com.allergenie.api.Models.Responses.MenuItemGroupDetails;
+import com.allergenie.api.Models.Responses.MessageResponse;
 import com.allergenie.api.Services.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -69,13 +70,11 @@ public class MenuController {
         }
     }
 
-    @DeleteMapping("/delete/{menuId}")
-    public ResponseEntity<String> deleteMenu(@PathVariable Integer menuId) {
+    @DeleteMapping("/{menuId}")
+    public ResponseEntity<MessageResponse> deleteMenu(@PathVariable Integer menuId) {
         try {
-            if (menuId == 0) {
-                return new ResponseEntity<>("Invalid menuId", HttpStatus.BAD_REQUEST);
-            }
-            return new ResponseEntity<>("You hit the API!", HttpStatus.OK);
+            menuService.deleteMenuById(menuId);
+            return new ResponseEntity<>(new MessageResponse("Successfully delete menu"), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

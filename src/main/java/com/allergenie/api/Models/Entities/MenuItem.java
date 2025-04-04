@@ -1,15 +1,20 @@
 package com.allergenie.api.Models.Entities;
 
 import com.allergenie.api.Models.Responses.MenuItemDetails;
+import com.allergenie.api.Models.Rows.MenuItemAllergenGroupRow;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Data
+@Builder
+@AllArgsConstructor
 @NoArgsConstructor
 public class MenuItem {
     @Id
@@ -32,5 +37,16 @@ public class MenuItem {
         this.extraDetails = details.getExtraDetails();
         this.price = details.getPrice();
         this.position = details.getPosition();
+    }
+
+    public MenuItem(MenuItemAllergenGroupRow row) {
+        this.id = row.getMenuItemId();
+        this.menuId = row.getMenuId();
+        this.menuItemGroupId = row.getGroupId();
+        this.name = row.getMenuItemName();
+        this.description = row.getMenuItemDescription();
+        this.extraDetails = row.getMenuItemExtraDetails();
+        this.price = row.getMenuItemPrice();
+        this.position = row.getMenuItemPosition();
     }
 }
