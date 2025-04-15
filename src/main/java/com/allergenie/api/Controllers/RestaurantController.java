@@ -32,8 +32,8 @@ public class RestaurantController {
     @GetMapping("/{id}")
     public ResponseEntity<Restaurant> getRestaurantById(Integer id) {
         try {
-            Optional<Restaurant> restaurant = restaurantService.getRestaurantById(id);
-            return restaurant.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+            Restaurant restaurant = restaurantService.getRestaurantById(id);
+            return new ResponseEntity<>(restaurant, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

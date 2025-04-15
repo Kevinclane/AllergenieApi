@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
-import static java.util.stream.Collectors.toList;
-
 @Transactional
 @Service
 public class MenuService {

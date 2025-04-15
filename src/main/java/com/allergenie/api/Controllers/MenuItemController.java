@@ -22,7 +22,7 @@ public class MenuItemController {
     @GetMapping("/all/{menuId}")
     public ResponseEntity<List<MenuItem>> getMenuItems(@PathVariable Integer menuId) {
         try {
-            List<MenuItem> menuItems = menuItemService.getMenuItems(menuId);
+            List<MenuItem> menuItems = menuItemService.getMenuItemsByMenuId(menuId);
             return new ResponseEntity<>(menuItems, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

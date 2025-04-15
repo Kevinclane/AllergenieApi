@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static com.allergenie.api.Services.Utils.isValidEmailAddress;
+import static com.allergenie.api.Utils.isValidEmailAddress;
 
 @Entity
 @Data

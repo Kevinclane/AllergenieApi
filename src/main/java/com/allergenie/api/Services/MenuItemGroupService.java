@@ -11,13 +11,8 @@ import java.util.List;
 @Transactional
 public class MenuItemGroupService {
     private MenuItemGroupRepo menuItemGroupRepo;
-
     public MenuItemGroupService(MenuItemGroupRepo menuItemGroupRepo) {
         this.menuItemGroupRepo = menuItemGroupRepo;
-    }
-
-    public List<MenuItemGroup> getMenuItemGroups(Integer menuId) {
-        return menuItemGroupRepo.findAllByMenuId(menuId);
     }
 
     public List<MenuItemGroup> saveGroups(List<MenuItemGroup> groups) {

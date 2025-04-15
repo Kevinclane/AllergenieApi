@@ -1,11 +1,17 @@
 package com.allergenie.api.Models.Rows;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MenuItemAllergenGroupRow {
     private Integer menuItemId;
     private Integer menuId;
