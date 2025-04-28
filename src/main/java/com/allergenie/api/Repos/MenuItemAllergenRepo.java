@@ -17,9 +17,14 @@ public interface MenuItemAllergenRepo extends JpaRepository<MenuItemAllergen, In
     List<MenuItemAllergen> findAllByMenuItemId(Integer menuItemId);
 
     @Modifying
-    @Query(value = "DELETE menu_item_allergen FROM menu_item_allergen " +
-            "JOIN menu_item mi on menu_item_allergen.menu_item_id = mi.id " +
-            "WHERE mi.id NOT IN ?1 and mi.menu_id = ?2",
-            nativeQuery = true)
+    @Query(value = """
+                DELETE FROM menu_item_allergen
+                WHERE menu_item_id IN (
+                    SELECT mi.id
+                    FROM menu_item mi
+                    WHERE mi.menu_id = ?2
+                    AND mi.id NOT IN (?1)
+                )
+            """, nativeQuery = true)
     void deleteUnusedMenuItemAllergens(List<Integer> menuItemIds, Integer menuId);
 }

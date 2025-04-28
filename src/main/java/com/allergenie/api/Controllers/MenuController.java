@@ -74,7 +74,7 @@ public class MenuController {
     public ResponseEntity<MessageResponse> deleteMenu(@PathVariable Integer menuId) {
         try {
             menuService.deleteMenuById(menuId);
-            return new ResponseEntity<>(new MessageResponse("Successfully delete menu"), HttpStatus.OK);
+            return new ResponseEntity<>(new MessageResponse("Successfully deleted menu"), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

@@ -10,10 +10,15 @@ import java.util.List;
 
 @Repository
 public interface MenuItemGroupRepo extends JpaRepository<MenuItemGroup, Integer> {
-    List<MenuItemGroup> findAllByMenuId(Integer menuId);
-
     @Modifying
-    @Query(value = "DELETE menu_item_group FROM menu_item_group WHERE id NOT IN ?1 AND menu_id = ?2",
-            nativeQuery = true)
+    @Query(value = """
+            DELETE FROM menu_item_group
+            WHERE id IN (
+                SELECT id
+                FROM menu_item_group
+                WHERE menu_id = ?2
+                AND id NOT IN (?1)
+                )
+            """, nativeQuery = true)
     void deleteUnusedGroups(List<Integer> existingGroupIds, Integer menuId);
 }

@@ -13,7 +13,14 @@ public interface MenuItemRepo extends JpaRepository<MenuItem, Integer> {
     List<MenuItem> findByMenuId(Integer menuId);
 
     @Modifying
-    @Query(value = "DELETE menu_item FROM menu_item WHERE id NOT IN ?1 AND menu_id = ?2",
-            nativeQuery = true)
+    @Query(value = """
+                DELETE FROM menu_item
+                WHERE id IN (
+                    SELECT mi.id
+                    FROM menu_item mi
+                    WHERE mi.menu_id = ?2
+                    AND mi.id NOT IN (?1)
+                )
+            """, nativeQuery = true)
     void deleteUnusedMenuItems(List<Integer> existingMenuItemIds, Integer menuId);
 }
