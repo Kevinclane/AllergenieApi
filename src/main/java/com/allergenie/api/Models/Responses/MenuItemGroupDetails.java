@@ -31,7 +31,7 @@ public class MenuItemGroupDetails {
 
     public MenuItemGroup getGroup() {
         return MenuItemGroup.builder()
-                .id(Objects.requireNonNullElse(this.id, 0))
+                .id(this.id == 0 ? null : this.id)
                 .menuId(this.menuId)
                 .name(this.name)
                 .position(this.position)
