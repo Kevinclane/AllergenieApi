@@ -38,10 +38,10 @@ public class MenuItemRepoTests {
     }
 
     @Nested
-    @DisplayName("deleteUnusedMenuItems")
-    public class DeleteUnusedMenuItems {
+    @DisplayName("findMenuItemIdsToDelete")
+    public class FindMenuItemIdsToDelete {
         @Test
-        public void shouldDeleteMenuItemNotLinkedToProvidedIds() {
+        public void shouldReturnListOfIds() {
             Menu firstMenu = Menu.builder()
                     .name("First Menu")
                     .build();
@@ -78,14 +78,8 @@ public class MenuItemRepoTests {
                     secondItemToDelete
             ));
 
-            menuItemRepo.deleteUnusedMenuItems(asList(firstItemToKeep.getId(), secondItemToKeep.getId(), thirdItemToKeep.getId()), firstMenu.getId());
-
-            List<MenuItem> expected = asList(
-                    firstItemToKeep,
-                    secondItemToKeep,
-                    thirdItemToKeep
-            );
-            List<MenuItem> actual = menuItemRepo.findAll();
+            List<Integer> expected = asList(firstItemToDelete.getId(), secondItemToDelete.getId());
+            List<Integer> actual = menuItemRepo.findMenuItemIdsToDelete(asList(firstItemToKeep.getId(), secondItemToKeep.getId(), thirdItemToKeep.getId()), firstMenu.getId());
 
             assertEquals(expected, actual);
         }

@@ -282,32 +282,21 @@ public class MenuService {
 
     @Transactional
     public List<MenuItemGroupDetails> updateMenuContents(List<MenuItemGroupDetails> request) {
-        Integer menuId = request.get(0).getMenuId();
-        List<MenuItemGroup> groups = new ArrayList<>();
-        for (MenuItemGroupDetails groupResponse : request) {
-            MenuItemGroup group = new MenuItemGroup();
-            group.setId(groupResponse.getId() == 0 ? null : groupResponse.getId());
-            group.setMenuId(groupResponse.getMenuId());
-            group.setName(groupResponse.getName());
-            group.setPosition(groupResponse.getPosition());
-            groups.add(group);
-        }
-
+        List<MenuItemGroup> groups = request.stream().map(MenuItemGroupDetails::getGroup).toList();
         menuItemGroupService.saveGroups(groups);
 
-        List<Integer> groupIds_toKeep = groups.stream().map(MenuItemGroup::getId).toList();
         List<Integer> menuItemIds_toKeep = new ArrayList<>();
 
+        List<Integer> groupIds_toKeep = groups.stream().map(MenuItemGroup::getId).toList();
         for (int i = 0; i < request.size(); i++) {
-            MenuItemGroupDetails groupDetails = request.get(i);
-            groupDetails.setId(groupIds_toKeep.get(i));
-            menuItemIds_toKeep.addAll(syncMenuItems(groupDetails));
+            MenuItemGroupDetails details = request.get(i);
+            details.setId(groupIds_toKeep.get(i));
+            menuItemIds_toKeep.addAll(syncMenuItems(details));
         }
 
+        Integer menuId = request.get(0).getMenuId();
         allergenService.deleteUnusedMenuItemAllergens(menuItemIds_toKeep, menuId);
         menuItemService.deleteUnusedMenuItems(menuItemIds_toKeep, menuId);
-
-        //!TODO add cascading delete - tbd based on how the drag n drop will change?
         menuItemGroupService.deleteUnusedGroups(groupIds_toKeep, menuId);
 
         return request;

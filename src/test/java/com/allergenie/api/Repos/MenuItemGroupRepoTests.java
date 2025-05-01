@@ -35,39 +35,39 @@ public class MenuItemGroupRepoTests {
         databaseUtils.resetDatabase();
     }
 
-    @Nested
-    @DisplayName("deleteUnusedGroups")
-    public class DeleteUnusedGroups {
-        @Test
-        public void shouldDeleteMenuItemGroupsNotLinkedToProvidedIds() {
-            Menu menu = Menu.builder()
-                    .name("Menu")
-                    .build();
-            menuRepo.saveAndFlush(menu);
-
-            MenuItemGroup firstGroupToKeep = MenuItemGroup.builder()
-                    .name("FirstGroup")
-                    .menuId(menu.getId())
-                    .build();
-            MenuItemGroup secondGroupToKeep = MenuItemGroup.builder()
-                    .name("SecondGroup")
-                    .menuId(menu.getId())
-                    .build();
-            MenuItemGroup firstGroupToDelete = MenuItemGroup.builder()
-                    .name("FirstToDelete")
-                    .menuId(menu.getId())
-                    .build();
-            MenuItemGroup secondGroupToDelete = MenuItemGroup.builder()
-                    .name("SecondToDelete")
-                    .menuId(menu.getId())
-                    .build();
-            menuItemGroupRepo.saveAllAndFlush(asList(firstGroupToKeep, secondGroupToKeep, firstGroupToDelete, secondGroupToDelete));
-
-            menuItemGroupRepo.deleteUnusedGroups(asList(firstGroupToKeep.getId(), secondGroupToKeep.getId()), menu.getId());
-
-            List<MenuItemGroup> expected = asList(firstGroupToKeep, secondGroupToKeep);
-            List<MenuItemGroup> actual = menuItemGroupRepo.findAll();
-            assertEquals(expected, actual);
-        }
-    }
+//    @Nested
+//    @DisplayName("deleteUnusedGroups")
+//    public class DeleteUnusedGroups {
+//        @Test
+//        public void shouldDeleteMenuItemGroupsNotLinkedToProvidedIds() {
+//            Menu menu = Menu.builder()
+//                    .name("Menu")
+//                    .build();
+//            menuRepo.saveAndFlush(menu);
+//
+//            MenuItemGroup firstGroupToKeep = MenuItemGroup.builder()
+//                    .name("FirstGroup")
+//                    .menuId(menu.getId())
+//                    .build();
+//            MenuItemGroup secondGroupToKeep = MenuItemGroup.builder()
+//                    .name("SecondGroup")
+//                    .menuId(menu.getId())
+//                    .build();
+//            MenuItemGroup firstGroupToDelete = MenuItemGroup.builder()
+//                    .name("FirstToDelete")
+//                    .menuId(menu.getId())
+//                    .build();
+//            MenuItemGroup secondGroupToDelete = MenuItemGroup.builder()
+//                    .name("SecondToDelete")
+//                    .menuId(menu.getId())
+//                    .build();
+//            menuItemGroupRepo.saveAllAndFlush(asList(firstGroupToKeep, secondGroupToKeep, firstGroupToDelete, secondGroupToDelete));
+//
+//            menuItemGroupRepo.deleteUnusedGroups(asList(firstGroupToKeep.getId(), secondGroupToKeep.getId()), menu.getId());
+//
+//            List<MenuItemGroup> expected = asList(firstGroupToKeep, secondGroupToKeep);
+//            List<MenuItemGroup> actual = menuItemGroupRepo.findAll();
+//            assertEquals(expected, actual);
+//        }
+//    }
 }

@@ -1,5 +1,6 @@
 package com.allergenie.api.Models.Responses;
 
+import com.allergenie.api.Models.Entities.MenuItemGroup;
 import com.allergenie.api.Models.Rows.MenuItemGroupRow;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -25,5 +27,14 @@ public class MenuItemGroupDetails {
         this.name = row.getGroupName();
         this.position = row.getGroupPosition();
         this.menuItems = menuItems;
+    }
+
+    public MenuItemGroup getGroup() {
+        return MenuItemGroup.builder()
+                .id(Objects.requireNonNullElse(this.id, 0))
+                .menuId(this.menuId)
+                .name(this.name)
+                .position(this.position)
+                .build();
     }
 }

@@ -11,6 +11,7 @@ import java.util.List;
 @Transactional
 public class MenuItemGroupService {
     private MenuItemGroupRepo menuItemGroupRepo;
+
     public MenuItemGroupService(MenuItemGroupRepo menuItemGroupRepo) {
         this.menuItemGroupRepo = menuItemGroupRepo;
     }
@@ -20,6 +21,9 @@ public class MenuItemGroupService {
     }
 
     public void deleteUnusedGroups(List<Integer> existingGroupIds, Integer menuId) {
-        menuItemGroupRepo.deleteUnusedGroups(existingGroupIds, menuId);
+        List<Integer> idsToDelete = menuItemGroupRepo.findGroupIdsToDelete(existingGroupIds, menuId);
+        if (idsToDelete.size() > 0) {
+            menuItemGroupRepo.deleteByIdIn(idsToDelete);
+        }
     }
 }

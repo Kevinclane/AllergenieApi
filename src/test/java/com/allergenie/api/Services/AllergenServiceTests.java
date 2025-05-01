@@ -15,9 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class AllergenServiceTests {
@@ -198,13 +198,38 @@ public class AllergenServiceTests {
     @Nested
     @DisplayName("deleteUnusedMenuItemAllergens")
     public class DeleteUnusedMenuItemAllergens {
-        @Test
-        public void shouldCallMenuItemAllergenRepo() {
-            List<Integer> menuItemIds = asList(3, 5, 6);
-            Integer menuId = 11;
 
-            service.deleteUnusedMenuItemAllergens(menuItemIds, menuId);
-            verify(menuItemAllergenRepo).deleteUnusedMenuItemAllergens(menuItemIds, menuId);
+        @Nested
+        @DisplayName("WhenIdsAreReturned")
+        public class WhenIdsAreReturned {
+            @Test
+            public void shouldCallRepoToDeleteByIds() {
+                List<Integer> menuItemIds = asList(3, 5, 6);
+                Integer menuId = 11;
+                List<Integer> idsToDelete = asList(69, 70, 71);
+
+                when(menuItemAllergenRepo.findMenuItemAllergenIdsToDelete(menuItemIds, menuId))
+                        .thenReturn(idsToDelete);
+
+                service.deleteUnusedMenuItemAllergens(menuItemIds, menuId);
+                verify(menuItemAllergenRepo).deleteByIdIn(idsToDelete);
+            }
+        }
+
+        @Nested
+        @DisplayName("WhenNoIdsAreReturned")
+        public class WhenNoIdsAreReturned {
+            @Test
+            public void shouldNotCallRepoToDeleteByIds() {
+                List<Integer> menuItemIds = asList(3, 5, 6);
+                Integer menuId = 11;
+
+                when(menuItemAllergenRepo.findMenuItemAllergenIdsToDelete(menuItemIds, menuId))
+                        .thenReturn(emptyList());
+
+                service.deleteUnusedMenuItemAllergens(menuItemIds, menuId);
+                verifyNoMoreInteractions(menuItemAllergenRepo);
+            }
         }
     }
 }

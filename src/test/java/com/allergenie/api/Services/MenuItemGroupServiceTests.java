@@ -13,7 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Mockito.verify;
+import static java.util.Collections.emptyList;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class MenuItemGroupServiceTests {
@@ -49,13 +50,38 @@ public class MenuItemGroupServiceTests {
     @Nested
     @DisplayName("deleteUnusedGroups")
     public class DeleteUnusedGroups {
-        @Test
-        public void shouldCallMenuItemGroupRepo() {
-            List<Integer> groupIds = asList(3, 6, 9);
-            Integer menuId = 11;
 
-            service.deleteUnusedGroups(groupIds, menuId);
-            verify(menuItemGroupRepo).deleteUnusedGroups(groupIds, menuId);
+        @Nested
+        @DisplayName("WhenIdsAreReturned")
+        public class WhenIdsAreReturned {
+            @Test
+            public void shouldCallRepoToDeleteByIds() {
+                List<Integer> menuItemIds = asList(3, 5, 6);
+                Integer menuId = 11;
+                List<Integer> idsToDelete = asList(69, 70, 71);
+
+                when(menuItemGroupRepo.findGroupIdsToDelete(menuItemIds, menuId))
+                        .thenReturn(idsToDelete);
+
+                service.deleteUnusedGroups(menuItemIds, menuId);
+                verify(menuItemGroupRepo).deleteByIdIn(idsToDelete);
+            }
+        }
+
+        @Nested
+        @DisplayName("WhenNoIdsAreReturned")
+        public class WhenNoIdsAreReturned {
+            @Test
+            public void shouldNotCallRepoToDeleteByIds() {
+                List<Integer> menuItemIds = asList(3, 5, 6);
+                Integer menuId = 11;
+
+                when(menuItemGroupRepo.findGroupIdsToDelete(menuItemIds, menuId))
+                        .thenReturn(emptyList());
+
+                service.deleteUnusedGroups(menuItemIds, menuId);
+                verifyNoMoreInteractions(menuItemGroupRepo);
+            }
         }
     }
 }

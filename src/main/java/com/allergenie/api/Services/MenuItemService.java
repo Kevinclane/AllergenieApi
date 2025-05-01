@@ -79,7 +79,10 @@ public class MenuItemService {
     }
 
     public void deleteUnusedMenuItems(List<Integer> existingMenuItemIds, Integer menuId) {
-        menuItemRepo.deleteUnusedMenuItems(existingMenuItemIds, menuId);
+        List<Integer> idToDelete = menuItemRepo.findMenuItemIdsToDelete(existingMenuItemIds, menuId);
+        if (idToDelete.size() > 0) {
+            menuItemRepo.deleteByIdIn(idToDelete);
+        }
     }
 
     public void cloneMenuChildren(Integer newMenuId, Integer originalMenuId) {
@@ -107,7 +110,7 @@ public class MenuItemService {
 
                 List<MenuItemAllergen> allergens = new ArrayList<>();
                 for (MenuItemAllergenGroupRow r : itemRows) {
-                    if(r.getAllergenId() == null) {
+                    if (r.getAllergenId() == null) {
                         continue;
                     }
                     MenuItemAllergen a = new MenuItemAllergen();
@@ -115,7 +118,7 @@ public class MenuItemService {
                     a.setAllergenId(r.getAllergenId());
                     allergens.add(a);
                 }
-                if(allergens.size() > 0) {
+                if (allergens.size() > 0) {
                     allergenService.saveMenuItemAllergens(allergens);
                 }
             }

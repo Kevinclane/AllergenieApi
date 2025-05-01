@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Import;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Import(DatabaseUtils.class)
@@ -116,10 +117,10 @@ public class MenuItemAllergenRepoTests {
     }
 
     @Nested
-    @DisplayName("deleteUnusedMenuItemAllergens")
-    public class DeleteUnusedMenuItemAllergens {
+    @DisplayName("findMenuItemAllergenIdsToDelete")
+    public class FindMenuItemAllergensIdsToDelete {
         @Test
-        public void shouldDeleteMenuItemAllergensNotLinkedToProvidedIds() {
+        public void shouldReturnListOfIds() {
             Menu menu = Menu.builder()
                     .name("Menu")
                     .build();
@@ -157,11 +158,10 @@ public class MenuItemAllergenRepoTests {
                     .build();
             menuItemAllergenRepo.saveAllAndFlush(asList(firstMiaToKeep, secondMiaToKeep, thirdMiaToKeep, miaToDelete));
 
-            menuItemAllergenRepo.deleteUnusedMenuItemAllergens(asList(firstItem.getId(), secondItem.getId()), menu.getId());
-
-            List<MenuItemAllergen> expected = asList(firstMiaToKeep, secondMiaToKeep, thirdMiaToKeep);
-            List<MenuItemAllergen> actual = menuItemAllergenRepo.findAllByMenuId(menu.getId());
+            List<Integer> expected = singletonList(miaToDelete.getId());
+            List<Integer> actual = menuItemAllergenRepo.findMenuItemAllergenIdsToDelete(asList(firstItem.getId(), secondItem.getId()), menu.getId());
             assertEquals(expected, actual);
+
         }
     }
 }

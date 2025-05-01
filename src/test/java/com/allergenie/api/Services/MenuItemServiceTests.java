@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -274,12 +275,38 @@ public class MenuItemServiceTests {
     @Nested
     @DisplayName("deleteUnusedMenuItems")
     public class DeleteUnusedMenuItems {
-        @Test
-        public void shouldCallMenuItemRepo() {
-            List<Integer> existingMenuIds = asList(1, 5, 6);
-            Integer menuId = 9;
-            service.deleteUnusedMenuItems(existingMenuIds, menuId);
-            verify(menuItemRepo).deleteUnusedMenuItems(existingMenuIds, menuId);
+
+        @Nested
+        @DisplayName("WhenIdsAreReturned")
+        public class WhenIdsAreReturned {
+            @Test
+            public void shouldCallRepoToDeleteByIds() {
+                List<Integer> existingMenuIds = asList(1, 5, 6);
+                Integer menuId = 9;
+                List<Integer> idsToDelete = asList(69, 70, 71);
+
+                when(menuItemRepo.findMenuItemIdsToDelete(existingMenuIds, menuId))
+                        .thenReturn(idsToDelete);
+
+                service.deleteUnusedMenuItems(existingMenuIds, menuId);
+                verify(menuItemRepo).deleteByIdIn(idsToDelete);
+            }
+        }
+
+        @Nested
+        @DisplayName("WhenNoIdsAreReturned")
+        public class WhenNoIdsAreReturned {
+            @Test
+            public void shouldNotCallRepoToDeleteByIds() {
+                List<Integer> existingMenuIds = asList(1, 5, 6);
+                Integer menuId = 9;
+
+                when(menuItemRepo.findMenuItemIdsToDelete(existingMenuIds, menuId))
+                        .thenReturn(emptyList());
+
+                service.deleteUnusedMenuItems(existingMenuIds, menuId);
+                verifyNoMoreInteractions(menuItemRepo);
+            }
         }
     }
 
