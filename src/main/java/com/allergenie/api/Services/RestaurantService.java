@@ -29,8 +29,8 @@ public class RestaurantService {
         return restaurants;
     }
 
-    public Optional<Restaurant> getRestaurantById(Integer id) {
-        Optional<Restaurant> restaurant = restaurantRepo.findById(id);
+    public Restaurant getRestaurantById(Integer id) {
+        Restaurant restaurant = restaurantRepo.findById(id).orElseThrow();
         return restaurant;
     }
 

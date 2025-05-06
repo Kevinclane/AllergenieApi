@@ -44,6 +44,9 @@ public class AllergenService {
     }
 
     public void deleteUnusedMenuItemAllergens(List<Integer> menuItemIds, Integer menuId) {
-        menuItemAllergenRepo.deleteUnusedMenuItemAllergens(menuItemIds, menuId);
+        List<Integer> idsToDelete = menuItemAllergenRepo.findMenuItemAllergenIdsToDelete(menuItemIds, menuId);
+        if (idsToDelete.size() > 0) {
+            menuItemAllergenRepo.deleteByIdIn(idsToDelete);
+        }
     }
 }

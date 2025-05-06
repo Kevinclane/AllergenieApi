@@ -1,6 +1,7 @@
 package com.allergenie.api.Controllers;
 
 import com.allergenie.api.Models.Entities.Restaurant;
+import com.allergenie.api.Models.Responses.MessageResponse;
 import com.allergenie.api.Services.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 
@@ -32,8 +32,8 @@ public class RestaurantController {
     @GetMapping("/{id}")
     public ResponseEntity<Restaurant> getRestaurantById(Integer id) {
         try {
-            Optional<Restaurant> restaurant = restaurantService.getRestaurantById(id);
-            return restaurant.map(value -> new ResponseEntity<>(value, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+            Restaurant restaurant = restaurantService.getRestaurantById(id);
+            return new ResponseEntity<>(restaurant, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -50,10 +50,10 @@ public class RestaurantController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Restaurant> deleteRestaurant(@PathVariable Integer id) {
+    public ResponseEntity<MessageResponse> deleteRestaurant(@PathVariable Integer id) {
         try {
             restaurantService.deleteRestaurant(id);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return new ResponseEntity<>(new MessageResponse("Successfully deleted restaurant"), HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }

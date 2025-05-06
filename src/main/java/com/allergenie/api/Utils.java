@@ -1,4 +1,4 @@
-package com.allergenie.api.Services;
+package com.allergenie.api;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;

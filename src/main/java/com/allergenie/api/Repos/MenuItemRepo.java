@@ -4,6 +4,7 @@ import com.allergenie.api.Models.Entities.MenuItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,8 +13,14 @@ import java.util.List;
 public interface MenuItemRepo extends JpaRepository<MenuItem, Integer> {
     List<MenuItem> findByMenuId(Integer menuId);
 
-    @Modifying
-    @Query(value = "DELETE menu_item FROM menu_item WHERE id NOT IN ?1 AND menu_id = ?2",
-            nativeQuery = true)
-    void deleteUnusedMenuItems(List<Integer> existingMenuItemIds, Integer menuId);
+    void deleteByIdIn(List<Integer> ids);
+
+    @Query(value = """
+                SELECT id
+                FROM menu_item
+                WHERE menu_id = :menuId
+                AND id NOT IN (:existingMenuItemIds)
+            """, nativeQuery = true)
+    List<Integer> findMenuItemIdsToDelete(@Param("existingMenuItemIds") List<Integer> existingMenuItemIds,
+                                          @Param("menuId") Integer menuId);
 }

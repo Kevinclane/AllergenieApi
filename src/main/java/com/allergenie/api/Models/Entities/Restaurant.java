@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static com.allergenie.api.Services.Utils.isValidEmailAddress;
+import static com.allergenie.api.Utils.isValidEmailAddress;
 
 @Entity
 @Data
@@ -50,7 +50,7 @@ public class Restaurant {
         if (this.name.isEmpty() || this.name.length() > 150) {
             return false;
         }
-        if (this.phoneNumber.isEmpty() || this.phoneNumber.length() > 10) {
+        if (this.phoneNumber.isEmpty() || this.phoneNumber.length() > 10 || !this.phoneNumber.matches("\\d+")) {
             return false;
         }
         if (!isValidEmailAddress(this.emailAddress)) {

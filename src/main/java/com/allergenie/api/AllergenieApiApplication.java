@@ -29,6 +29,9 @@ public class AllergenieApiApplication implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        if (args.length == 0) {
+            return;
+        }
         String[] activeProfiles = environment.getActiveProfiles();
 
         if (activeProfiles.length == 0) {

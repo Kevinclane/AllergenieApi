@@ -16,15 +16,14 @@ public class MenuItemGroupService {
         this.menuItemGroupRepo = menuItemGroupRepo;
     }
 
-    public List<MenuItemGroup> getMenuItemGroups(Integer menuId) {
-        return menuItemGroupRepo.findAllByMenuId(menuId);
-    }
-
     public List<MenuItemGroup> saveGroups(List<MenuItemGroup> groups) {
         return menuItemGroupRepo.saveAll(groups);
     }
 
     public void deleteUnusedGroups(List<Integer> existingGroupIds, Integer menuId) {
-        menuItemGroupRepo.deleteUnusedGroups(existingGroupIds, menuId);
+        List<Integer> idsToDelete = menuItemGroupRepo.findGroupIdsToDelete(existingGroupIds, menuId);
+        if (idsToDelete.size() > 0) {
+            menuItemGroupRepo.deleteByIdIn(idsToDelete);
+        }
     }
 }

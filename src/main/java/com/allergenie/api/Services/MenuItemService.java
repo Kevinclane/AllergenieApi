@@ -8,14 +8,16 @@ import com.allergenie.api.Models.Responses.LoadedMenuResponse;
 import com.allergenie.api.Models.Responses.MenuItemDetails;
 import com.allergenie.api.Models.Responses.MenuItemGroupDetails;
 import com.allergenie.api.Models.Rows.MenuItemAllergenGroupRow;
-import com.allergenie.api.Models.Rows.MenuItemGroupRow;
 import com.allergenie.api.Repos.MenuItemGroupRepo;
 import com.allergenie.api.Repos.MenuItemJdbcRepo;
 import com.allergenie.api.Repos.MenuItemRepo;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +40,7 @@ public class MenuItemService {
         this.menuItemGroupRepo = menuItemGroupRepo;
     }
 
-    public List<MenuItem> getMenuItems(Integer menuId) {
+    public List<MenuItem> getMenuItemsByMenuId(Integer menuId) {
         return menuItemRepo.findByMenuId(menuId);
     }
 
@@ -77,7 +79,10 @@ public class MenuItemService {
     }
 
     public void deleteUnusedMenuItems(List<Integer> existingMenuItemIds, Integer menuId) {
-        menuItemRepo.deleteUnusedMenuItems(existingMenuItemIds, menuId);
+        List<Integer> idToDelete = menuItemRepo.findMenuItemIdsToDelete(existingMenuItemIds, menuId);
+        if (idToDelete.size() > 0) {
+            menuItemRepo.deleteByIdIn(idToDelete);
+        }
     }
 
     public void cloneMenuChildren(Integer newMenuId, Integer originalMenuId) {
@@ -105,12 +110,17 @@ public class MenuItemService {
 
                 List<MenuItemAllergen> allergens = new ArrayList<>();
                 for (MenuItemAllergenGroupRow r : itemRows) {
+                    if (r.getAllergenId() == null) {
+                        continue;
+                    }
                     MenuItemAllergen a = new MenuItemAllergen();
                     a.setMenuItemId(menuItem.getId());
                     a.setAllergenId(r.getAllergenId());
                     allergens.add(a);
                 }
-                allergenService.saveMenuItemAllergens(allergens);
+                if (allergens.size() > 0) {
+                    allergenService.saveMenuItemAllergens(allergens);
+                }
             }
 
         }
