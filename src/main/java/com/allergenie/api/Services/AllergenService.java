@@ -5,6 +5,7 @@ import com.allergenie.api.Models.Entities.MenuItemAllergen;
 import com.allergenie.api.Repos.AllergenRepo;
 import com.allergenie.api.Repos.MenuItemAllergenRepo;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +16,7 @@ public class AllergenService {
     private AllergenRepo allergenRepo;
     private MenuItemAllergenRepo menuItemAllergenRepo;
 
+    @Autowired
     public AllergenService(
             AllergenRepo allergenRepo,
             MenuItemAllergenRepo menuItemAllergenRepo

@@ -8,6 +8,7 @@ import com.allergenie.api.Models.Responses.MenuItemGroupDetails;
 import com.allergenie.api.Repos.MenuJdbcRepo;
 import com.allergenie.api.Repos.MenuRepo;
 import com.allergenie.api.Repos.RestaurantMenuCrosswalkRepo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class MenuService {
     private MenuItemService menuItemService;
     private AllergenService allergenService;
 
+    @Autowired
     public MenuService(
             MenuJdbcRepo menuJdbcRepo,
             MenuRepo menuRepo,
@@ -304,5 +306,13 @@ public class MenuService {
 
     public void deleteMenuById(Integer menuId) {
         menuJdbcRepo.deleteMenuAndChildren(menuId);
+    }
+
+    @Transactional
+    public void deleteByRestaurantId(Integer id) {
+        List<Integer> menuIds = menuRepo.findAllByRestaurantId(id);
+        for (Integer menuId : menuIds) {
+            deleteMenuById(menuId);
+        }
     }
 }
