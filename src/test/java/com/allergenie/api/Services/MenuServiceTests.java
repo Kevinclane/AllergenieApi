@@ -1457,4 +1457,18 @@ public class MenuServiceTests {
         service.deleteMenuById(20);
         verify(menuJdbcRepo).deleteMenuAndChildren(20);
     }
+
+    @Test
+    public void deleteByRestaurantId_shouldDeleteAllMenusAndChildrenRelatedToRestaurant() {
+        Integer restaurantId = 33;
+        List<Integer> menuIds = asList(3, 6, 22);
+        when(menuRepo.findAllByRestaurantId(restaurantId))
+                .thenReturn(menuIds);
+
+        service.deleteByRestaurantId(restaurantId);
+
+        verify(menuJdbcRepo).deleteMenuAndChildren(menuIds.get(0));
+        verify(menuJdbcRepo).deleteMenuAndChildren(menuIds.get(1));
+        verify(menuJdbcRepo).deleteMenuAndChildren(menuIds.get(2));
+    }
 }

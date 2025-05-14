@@ -25,9 +25,11 @@ public class RestaurantServiceTests {
     private RestaurantRepo restaurantRepo;
     @Mock
     private RestaurantJdbcRepo restaurantJdbcRepo;
+    @Mock
+    private MenuService menuService;
 
     @InjectMocks
-    RestaurantService service;
+    private RestaurantService service;
 
     @Nested
     @DisplayName("getRestaurants")

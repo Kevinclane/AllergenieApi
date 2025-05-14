@@ -12,6 +12,7 @@ import com.allergenie.api.Repos.MenuItemGroupRepo;
 import com.allergenie.api.Repos.MenuItemJdbcRepo;
 import com.allergenie.api.Repos.MenuItemRepo;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class MenuItemService {
     private MenuItemJdbcRepo menuItemJdbcRepo;
     private MenuItemGroupRepo menuItemGroupRepo;
 
+    @Autowired
     public MenuItemService(
             AllergenService allergenService,
             MenuItemRepo menuItemRepo,

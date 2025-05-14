@@ -3,6 +3,7 @@ package com.allergenie.api.Services;
 import com.allergenie.api.Models.Entities.MenuItemGroup;
 import com.allergenie.api.Repos.MenuItemGroupRepo;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.List;
 public class MenuItemGroupService {
     private MenuItemGroupRepo menuItemGroupRepo;
 
+    @Autowired
     public MenuItemGroupService(MenuItemGroupRepo menuItemGroupRepo) {
         this.menuItemGroupRepo = menuItemGroupRepo;
     }

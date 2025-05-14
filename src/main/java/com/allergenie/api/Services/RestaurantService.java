@@ -4,6 +4,7 @@ import com.allergenie.api.Models.Entities.Restaurant;
 import com.allergenie.api.Repos.RestaurantJdbcRepo;
 import com.allergenie.api.Repos.RestaurantRepo;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,13 +16,17 @@ public class RestaurantService {
 
     private RestaurantRepo restaurantRepo;
     private RestaurantJdbcRepo restaurantJdbcRepo;
+    private MenuService menuService;
 
+    @Autowired
     public RestaurantService(
             RestaurantRepo restaurantRepo,
-            RestaurantJdbcRepo restaurantJdbcRepo
+            RestaurantJdbcRepo restaurantJdbcRepo,
+            MenuService menuService
     ) {
         this.restaurantRepo = restaurantRepo;
         this.restaurantJdbcRepo = restaurantJdbcRepo;
+        this.menuService = menuService;
     }
 
     public List<Restaurant> getRestaurants() {
@@ -52,7 +57,7 @@ public class RestaurantService {
     }
 
     public void deleteRestaurant(Integer id) {
-        //add cascade delete
+        menuService.deleteByRestaurantId(id);
         restaurantRepo.deleteById(id);
     }
 }
